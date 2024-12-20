@@ -384,7 +384,20 @@ onMounted(() => {
         }
 
         if (cursorConf.show) {
-          if (key === 'tab') {
+          if (key === 'home') {
+            terminalCmdInputRef.value.selectionStart = 0
+            terminalCmdInputRef.value.selectionEnd = 0
+            cursorConf.idx = 0
+
+            event.preventDefault()
+          } else if(key == 'end') {
+            let valueLen = terminalCmdInputRef.value.value.length
+            terminalCmdInputRef.value.selectionStart = valueLen
+            terminalCmdInputRef.value.selectionEnd = valueLen
+            cursorConf.idx = valueLen
+
+            event.preventDefault()
+          } else if (key === 'tab') {
             _selectTips()
             event.preventDefault()
           } else if (document.activeElement !== terminalCmdInputRef.value) {
@@ -1381,7 +1394,10 @@ const _inputKeyDown = () => {
 const _switchTipsSelectedIdx = (idx: number) => {
   let viewItem = terminalCmdTipsRef.value.querySelector(".t-cmd-tips-item:nth-child(" + (idx + 1) + ")")
   if (viewItem) {
-    viewItem.scrollIntoView({block: "start", behavior: "smooth"})
+    viewItem.scrollIntoView({
+      block: "center",
+      behavior: "smooth"
+    })
   }
   tips.selectedIndex = idx
 
