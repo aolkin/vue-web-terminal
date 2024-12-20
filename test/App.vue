@@ -378,6 +378,9 @@ const textAreaKeyEnter = () => {
         <!--        <template #header>-->
         <!--          <div class="custom-header">This is custom header</div>-->
         <!--        </template>-->
+<!--        <template #cmdLine="{ item }">-->
+<!--          <span>{{ item.content }}</span>-->
+<!--        </template>-->
       </terminal>
     </div>
   </div>
