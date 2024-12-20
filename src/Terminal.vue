@@ -693,11 +693,11 @@ const setTheme = (theme: string) => {
   }
   let css = themeStyle.match(/^.*\{(.*)}\s*$/s)[1]
 
-  let terminalName = hash(getName())
+  let terminalNameKey = hash(getName())
 
-  themeStyle = `#t-${terminalName} { ${css} }`
+  themeStyle = `.t-container[t-data-key="${terminalNameKey}"] { ${css} }`
 
-  let tagId = getThemeStyleId(terminalName)
+  let tagId = getThemeStyleId(terminalNameKey)
   let styleTag = document.getElementById(tagId)
   if (styleTag) {
     styleTag.innerHTML = themeStyle
@@ -711,14 +711,14 @@ const setTheme = (theme: string) => {
 
 /**
  * 当改名时，需更新css文件
- * @param newName 新名（已转换过）
- * @param oldName 旧名（已转换过）
+ * @param newNameKey 新 Key（已转换过）
+ * @param oldNameKey 旧 Key（已转换过）
  */
-const changeThemeFlag = (newName: string, oldName: string) => {
-  let newTagId = getThemeStyleId(newName)
-  let oldThemeStyle = document.getElementById(getThemeStyleId(oldName))
+const changeThemeFlag = (newNameKey: string, oldNameKey: string) => {
+  let newTagId = getThemeStyleId(newNameKey)
+  let oldThemeStyle = document.getElementById(getThemeStyleId(oldNameKey))
   if (oldThemeStyle) {
-    let style = oldThemeStyle.innerHTML.replace(`#t-${oldName}`, `#t-${newName}`)
+    let style = oldThemeStyle.innerHTML.replace(`[t-data-key="${oldNameKey}"]`, `[t-data-key="${newNameKey}"]`)
     oldThemeStyle.id = newTagId
     oldThemeStyle.innerHTML = style
   }
@@ -1995,7 +1995,7 @@ defineExpose({
 
 <template>
   <div :class="'t-container ' + (isActive ? '' : 't-disable-select')"
-       :id="`t-${hash(getName())}`"
+       :t-data-key="hash(getName())"
        :style="containerStyle"
        ref="terminalContainerRef">
     <div v-if="draggable">
