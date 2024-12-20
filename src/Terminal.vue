@@ -552,6 +552,8 @@ onMounted(() => {
       return _setCommand(options)
     } else if (type === 'switchAllFoldState') {
       return _switchAllFoldState(options)
+    } else if (type === 'jumpToBottom') {
+      return _jumpToBottom(options)
     } else {
       console.error(`Unsupported event type ${type} in instance ${getName()}`)
     }
@@ -1988,7 +1990,8 @@ defineExpose({
   clearLog: _clearLog,
   getCommand: _getCommand,
   setCommand: _setCommand,
-  switchAllFoldState: _switchAllFoldState
+  switchAllFoldState: _switchAllFoldState,
+  jumpToBottom: _jumpToBottom
 })
 
 </script>

@@ -339,6 +339,10 @@ export class TerminalApi {
     switchAllFoldState(name: string, options: boolean): any {
         return this.post(name, 'switchAllFoldState', options)
     }
+
+    jumpToBottom(name: string, options: boolean): any {
+        return this.post(name, 'jumpToBottom', options)
+    }
 }
 
 export interface EditorSetting {
