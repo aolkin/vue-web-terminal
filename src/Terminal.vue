@@ -41,7 +41,7 @@ import {
   _openUrl,
   _parsePixelFromValue,
   _pointInRect,
-  _screenType,
+  _screenType, hash,
 } from "~/common/util.ts";
 import api, {getOptions, register, rename, unregister} from "~/common/api";
 import {DEFAULT_COMMANDS, WINDOW_STYLE} from "~/common/configuration.ts";
@@ -555,7 +555,7 @@ onUnmounted(() => {
   }
 
   //  移除样式文件
-  let style = document.getElementById(getThemeStyleId(parseNameHtmlSafely(getName())))
+  let style = document.getElementById(getThemeStyleId(hash(getName())))
   if (style) {
     document.body.removeChild(style)
   }
@@ -587,7 +587,7 @@ watch(
       let newName = newVal ? newVal : getName()
       let oldName = oldVal ? oldVal : _name.value
       rename(newName, oldName, terminalListener.value)
-      changeThemeFlag(parseNameHtmlSafely(newName), parseNameHtmlSafely(oldName))
+      changeThemeFlag(hash(newName), hash(oldName))
     }
 )
 
@@ -657,10 +657,6 @@ const getThemeStyleId = (salt: string): string => {
   return `t-theme-style-${salt}`
 }
 
-const parseNameHtmlSafely = (name: string): string => {
-  return name.replace(/[\[\]{}#\s\\.,:;%|*+=@!?&()\/]/g, '_')
-}
-
 /**
  * 设置主题
  * @param theme
@@ -680,7 +676,7 @@ const setTheme = (theme: string) => {
   }
   let css = themeStyle.match(/^.*\{(.*)}\s*$/s)[1]
 
-  let terminalName = parseNameHtmlSafely(getName())
+  let terminalName = hash(getName())
 
   themeStyle = `#t-${terminalName} { ${css} }`
 
@@ -1963,7 +1959,7 @@ defineExpose({
 
 <template>
   <div :class="'t-container ' + (isActive ? '' : 't-disable-select')"
-       :id="`t-${parseNameHtmlSafely(getName())}`"
+       :id="`t-${hash(getName())}`"
        :style="containerStyle"
        ref="terminalContainerRef">
     <div v-if="draggable">
