@@ -15,6 +15,7 @@ import {
   InputTipsSelectHandlerFunc,
   Message,
   MessageGroup,
+  Position,
   PushMessageBeforeFunc,
   SuccessFunc,
   TerminalAsk,
@@ -41,7 +42,8 @@ import {
   _openUrl,
   _parsePixelFromValue,
   _pointInRect,
-  _screenType, hash,
+  _screenType,
+  hash,
 } from "~/common/util.ts";
 import api, {getOptions, register, rename, unregister} from "~/common/api";
 import {DEFAULT_COMMANDS, WINDOW_STYLE} from "~/common/configuration.ts";
@@ -70,7 +72,8 @@ const emits = defineEmits([
   "init-complete",
   'on-active',
   'on-inactive',
-  'on-resize'
+  'on-resize',
+  'on-dragging'
 ])
 const props = defineProps({
   title: {
@@ -1711,6 +1714,9 @@ const _dragging = (x: number, y: number) => {
 
   containerStyleStore.value.left = xVal + "px";
   containerStyleStore.value.top = yVal + "px";
+
+  let position: Position = {x: xVal, y: yVal}
+  emits('on-dragging', position, getName())
 }
 
 const _commandFormatter = (cmd: string): string => {
