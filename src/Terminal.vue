@@ -385,16 +385,11 @@ onMounted(() => {
 
         if (cursorConf.show) {
           if (key === 'home') {
-            terminalCmdInputRef.value.selectionStart = 0
-            terminalCmdInputRef.value.selectionEnd = 0
-            cursorConf.idx = 0
+            _setCursorIdx(0)
 
             event.preventDefault()
           } else if(key == 'end') {
-            let valueLen = terminalCmdInputRef.value.value.length
-            terminalCmdInputRef.value.selectionStart = valueLen
-            terminalCmdInputRef.value.selectionEnd = valueLen
-            cursorConf.idx = valueLen
+            _setCursorIdx(terminalCmdInputRef.value.value.length)
 
             event.preventDefault()
           } else if (key === 'tab') {
@@ -440,7 +435,13 @@ onMounted(() => {
             .replace(/\r\n/g, '\n')
             .replace(/\r/g, '\n')
         const cmd = command.value;
-        command.value = cmd && cmd.length > 0 ? `${cmd}${text}` : text;
+        let cursorIdx = cursorConf.idx
+        command.value = cmd.substring(0, cursorIdx) + text + cmd.substring(cursorIdx)
+        nextTick(() => {
+          _setCursorIdx(cursorIdx + text.length)
+          _calculateCursorPos()
+        })
+
         _focus()
         _jumpToBottom()
       }).catch(error => {
@@ -980,15 +981,19 @@ const _inputEnter = (e: KeyboardEvent) => {
       cursorIdx++
       //  恢复光标位置
       nextTick(() => {
-        terminalCmdInputRef.value.selectionStart = cursorIdx
-        terminalCmdInputRef.value.selectionEnd = cursorIdx
-        cursorConf.idx = cursorIdx
+        _setCursorIdx(cursorIdx)
       })
       _jumpToBottom()
     }
   } else {
     _execute()
   }
+}
+
+const _setCursorIdx = (idx: number) => {
+  terminalCmdInputRef.value.selectionStart = idx
+  terminalCmdInputRef.value.selectionEnd = idx
+  cursorConf.idx = idx
 }
 
 const _execute = () => {
