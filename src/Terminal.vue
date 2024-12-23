@@ -2094,7 +2094,7 @@ defineExpose({
            ref="terminalInputBoxRef"
            v-show="showInputLine"
            :style="`margin-top:${lineSpace}px;`">
-          <span class="t-prompt t-cmd-line-content t-disable-select" ref="terminalInputPromptRef">
+          <span class="t-prompt t-cmd-line-content" ref="terminalInputPromptRef">
             <span>{{ context }}</span>
             <span>{{ contextSuffix }}</span>
           </span><span class="t-cmd-line-content" v-html="_commandFormatter(command)"></span><span
