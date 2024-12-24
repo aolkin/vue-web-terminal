@@ -312,7 +312,7 @@ const keydownListener = ref()
 const terminalListener = ref()
 
 const resizeObserver = ref<ResizeObserver>()
-const autoScrollToBottom = ref(true)
+const forceScrollToBottom = ref(true)
 
 onMounted(() => {
   emits('init-before', getName())
@@ -484,7 +484,7 @@ onMounted(() => {
     let doc = e.target as HTMLElement
     let bottom = doc.scrollHeight - doc.clientHeight - doc.scrollTop
 
-    autoScrollToBottom.value = bottom <= 30;
+    forceScrollToBottom.value = bottom <= 100;
   })
 
   //  如果是移动设备，需要监听touch事件来模拟双击事件
@@ -1151,22 +1151,23 @@ const _newTerminalLogGroup = (tag?: string): MessageGroup => {
 }
 
 const _pushMessage = (message: Message | Array<Message> | string) => {
+  let forceToBottom = forceScrollToBottom.value
   if (!message) return
   if (message instanceof Array) {
     for (let m of message) {
       _pushMessage0(m, false)
     }
     _checkLogSize()
-    _jumpToBottom()
+    _jumpToBottom(forceToBottom)
     return;
   }
 
   _pushMessage0(message)
-  _jumpToBottom()
+  _jumpToBottom(forceToBottom)
 
   if (typeof message != 'string' && message.type === 'json') {
     setTimeout(() => {
-      _jumpToBottom()
+      _jumpToBottom(forceToBottom)
     }, 80)
   }
 }
@@ -1263,7 +1264,7 @@ const _appendMessage = (message: string) => {
 }
 
 const _jumpToBottom = (force: boolean = false) => {
-  if (!force && !autoScrollToBottom.value) {
+  if (!force && !forceScrollToBottom.value) {
     return
   }
   nextTick(() => {
@@ -1495,7 +1496,7 @@ const _onInput = _debounce((e: InputEvent) => {
       tips.helpBox.lastRect = null
     }
   })
-
+  _jumpToBottom(true)
 }, 100)
 
 const _checkInputCursor = () => {
