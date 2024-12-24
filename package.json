@@ -1,6 +1,6 @@
 {
   "name": "vue-web-terminal",
-  "version": "3.3.2",
+  "version": "3.3.3-rc.1",
   "description": "A beautiful web-side command line window plugin (native simulation). 一个漂亮的网页命令行插件（原生模拟）",
   "license": "Apache-2.0",
   "private": false,
@@ -39,16 +39,16 @@
     "vue-json-viewer": "^3.0.4"
   },
   "devDependencies": {
-    "@types/node": "^20.4.5",
-    "@vitejs/plugin-vue": "^4.2.3",
-    "rollup-plugin-visualizer": "^5.9.2",
-    "sass": "^1.62.1",
-    "terser": "^5.19.2",
-    "typescript": "^5.0.2",
-    "vite": "^4.4.5",
-    "vue-tsc": "^1.8.5",
-    "vite-plugin-css-injected-by-js": "^3.3.0",
-    "vite-plugin-dts": "^3.6.3"
+    "@types/node": "20.16.13",
+    "@vitejs/plugin-vue": "4.6.2",
+    "rollup-plugin-visualizer": "5.9.3",
+    "sass": "1.62.1",
+    "terser": "5.37.0",
+    "typescript": "5.4.5",
+    "vite": "5.4.6",
+    "vue-tsc": "1.8.26",
+    "vite-plugin-css-injected-by-js": "3.3.1",
+    "vite-plugin-dts": "3.6.3"
   },
   "browserslist": [
     "> 1%",
