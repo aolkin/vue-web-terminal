@@ -1462,7 +1462,7 @@ const _calculateStringWidth = (str: string): number => {
   return width
 }
 
-const _onInput = (e: InputEvent) => {
+const _onInput = _debounce((e: InputEvent) => {
   if (props.inputFilter) {
     let value = (e.target as HTMLInputElement).value
     let newStr = props.inputFilter(e.data, value, e)
@@ -1496,7 +1496,7 @@ const _onInput = (e: InputEvent) => {
     }
   })
 
-}
+}, 100)
 
 const _checkInputCursor = () => {
   let eIn = terminalCmdInputRef.value
