@@ -28,6 +28,10 @@ const commandStore: Array<Command> = [
   },
   {
     key: "Test CONFIG",
+  },
+  {
+    key: "theme",
+    usage: "theme <dark|light>",
   }
 ]
 const initLog = reactive([
@@ -120,14 +124,14 @@ const onExecCmd = (key: string, command: string, success: SuccessFunc, failed: F
           "</template>"
     })
   } else if (key === 'loop') {
-    let count = 0
+    let count = 200
     let timer = setInterval(() => {
-      if (count++ > 10) {
+      if (count-- <= 0) {
         clearInterval(timer)
         success()
       }
       TerminalApi.pushMessage(name, "loop: " + count)
-    }, 500)
+    }, 200)
   } else if (key === 'json') {
     success({
       type: 'json',

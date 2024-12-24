@@ -312,6 +312,7 @@ const keydownListener = ref()
 const terminalListener = ref()
 
 const resizeObserver = ref<ResizeObserver>()
+const autoScrollToBottom = ref(true)
 
 onMounted(() => {
   emits('init-before', getName())
@@ -443,7 +444,7 @@ onMounted(() => {
         })
 
         _focus()
-        _jumpToBottom()
+        _jumpToBottom(true)
       }).catch(error => {
         console.error(error);
       })
@@ -478,6 +479,13 @@ onMounted(() => {
       }
     });
   });
+
+  _eventOn(terminalWindowRef.value, 'scroll', (e: Event) => {
+    let doc = e.target as HTMLElement
+    let bottom = doc.scrollHeight - doc.clientHeight - doc.scrollTop
+
+    autoScrollToBottom.value = bottom <= 30;
+  })
 
   //  如果是移动设备，需要监听touch事件来模拟双击事件
   if (_isPhone() || _isPad()) {
@@ -985,7 +993,7 @@ const _inputEnter = (e: KeyboardEvent) => {
       nextTick(() => {
         _setCursorIdx(cursorIdx)
       })
-      _jumpToBottom()
+      _jumpToBottom(true)
     }
   } else {
     _execute()
@@ -1036,7 +1044,7 @@ const _execute = () => {
                 ask.callback = options.callback
                 ask.autoReview = options.autoReview
                 _focus()
-                _jumpToBottom()
+                _jumpToBottom(true)
               })
 
               message.onFinish(() => {
@@ -1254,7 +1262,10 @@ const _appendMessage = (message: string) => {
   }
 }
 
-const _jumpToBottom = () => {
+const _jumpToBottom = (force: boolean = false) => {
+  if (!force && !autoScrollToBottom.value) {
+    return
+  }
   nextTick(() => {
     let box = terminalWindowRef.value
     if (box != null) {
@@ -1424,7 +1435,7 @@ const _switchPreCmd = () => {
   _resetCursorPos()
   store.setIdx(getName(), cmdIdx)
   _searchCmd()
-  _jumpToBottom()
+  _jumpToBottom(true)
 }
 
 const _switchNextCmd = () => {
@@ -1440,7 +1451,7 @@ const _switchNextCmd = () => {
   _resetCursorPos()
   store.setIdx(getName(), cmdIdx)
   _searchCmd()
-  _jumpToBottom()
+  _jumpToBottom(true)
 }
 
 const _calculateStringWidth = (str: string): number => {
@@ -1919,7 +1930,7 @@ const _selectTips = () => {
       if (newCommand && typeof newCommand === 'string') {
         command.value = newCommand
         _resetCursorPos()
-        _jumpToBottom()
+        _jumpToBottom(true)
       } else {
         console.warn(`'tipsSelectHandler' returns an invalid result, the expected return value is string type, got ${typeof newCommand}.`)
       }
@@ -1928,7 +1939,7 @@ const _selectTips = () => {
   }
   command.value = selectedItem.command.key
   _resetCursorPos()
-  _jumpToBottom()
+  _jumpToBottom(true)
 }
 
 const _getElementInfo = (): TerminalElementInfo => {
