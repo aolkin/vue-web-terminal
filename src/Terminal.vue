@@ -43,7 +43,7 @@ import {
   _parsePixelFromValue,
   _pointInRect,
   _screenType,
-  hash,
+  _hash,
 } from "~/common/util.ts";
 import api, {getOptions, register, rename, unregister} from "~/common/api";
 import {DEFAULT_COMMANDS, WINDOW_STYLE} from "~/common/configuration.ts";
@@ -582,7 +582,7 @@ onUnmounted(() => {
   }
 
   //  移除样式文件
-  let style = document.getElementById(getThemeStyleId(hash(getName())))
+  let style = document.getElementById(getThemeStyleId(_hash(getName())))
   if (style) {
     document.body.removeChild(style)
   }
@@ -614,7 +614,7 @@ watch(
       let newName = newVal ? newVal : getName()
       let oldName = oldVal ? oldVal : _name.value
       rename(newName, oldName, terminalListener.value)
-      changeThemeFlag(hash(newName), hash(oldName))
+      changeThemeFlag(_hash(newName), _hash(oldName))
     }
 )
 
@@ -703,7 +703,7 @@ const setTheme = (theme: string) => {
   }
   let css = themeStyle.match(/^.*\{(.*)}\s*$/s)[1]
 
-  let terminalNameKey = hash(getName())
+  let terminalNameKey = _hash(getName())
 
   themeStyle = `.t-container[t-data-key="${terminalNameKey}"] { ${css} }`
 
@@ -2010,7 +2010,7 @@ defineExpose({
 
 <template>
   <div :class="'t-container ' + (isActive ? '' : 't-disable-select')"
-       :t-data-key="hash(getName())"
+       :t-data-key="_hash(getName())"
        :style="containerStyle"
        ref="terminalContainerRef">
     <div v-if="draggable">

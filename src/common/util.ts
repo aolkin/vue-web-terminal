@@ -26,7 +26,7 @@ export function _html(str: string): string {
  * @returns {boolean|boolean}
  * @private
  */
-export function _isEmpty(value) {
+export function _isEmpty(value: string | object | undefined | null): boolean {
     return (
         value === undefined ||
         value === null ||
@@ -35,12 +35,8 @@ export function _isEmpty(value) {
     );
 }
 
-export function _nonEmpty(value) {
+export function _nonEmpty(value: string | object | undefined | null) {
     return !_isEmpty(value)
-}
-
-export function _sleep(time) {
-    return new Promise((resolve) => setTimeout(resolve, time));
 }
 
 export function _screenType(width: number = document.body.clientWidth): ScreenType {
@@ -452,7 +448,7 @@ export function _parsePixelFromValue(value: number | string, parentPixel: number
     return pixel
 }
 
-export function hash(str: string) {
+export function _hash(str: string) {
     // Step 1: Initialize hash value
     let hash = 5381;
 
@@ -466,8 +462,4 @@ export function hash(str: string) {
 
     // Step 4: Convert hash to hexadecimal string
     return hash.toString(16);
-}
-
-const parseStrHtmlSafely = (str: string): string => {
-    return str.replace(/[\[\]{}#\s\\.,:;%|*+=@!?&()\/]/g, '_')
 }
