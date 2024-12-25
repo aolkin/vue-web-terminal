@@ -51,6 +51,9 @@ Please go to [Document](https://tzfun.github.io/vue-web-terminal/)
 
 # Quick Start
 
+> The **Vue2** version will be officially archived from **December 24, 2024** and will no longer provide maintenance updates.
+> For the source code, see [vue2 branch](https://github.com/tzfun/vue-web-terminal/tree/vue2).
+
 Install vue-web-terminal by npm. The `2.x.x` version corresponds to vue2, and the `3.x.x` version corresponds to vue3.
 It is recommended to download the latest version corresponding to the main version.
 
@@ -77,37 +80,29 @@ const app = createApp(App).use(Terminal)
 Example:
 
 ```vue
+<script setup>
+  import Terminal from "vue-web-terminal"
+  const onExecCmd = (key, command, success, failed) => {
+    if (key === 'fail') {
+      failed('Something wrong!!!')
+    } else {
+      let allClass = ['success', 'error', 'system', 'info', 'warning'];
+
+      let clazz = allClass[Math.floor(Math.random() * allClass.length)];
+      success({
+        type: 'normal',
+        class: clazz,
+        tag: 'success',
+        content: command
+      })
+    }
+  }
+</script>
 <template>
   <div id="app">
     <terminal name="my-terminal" @exec-cmd="onExecCmd"></terminal>
   </div>
 </template>
-
-<script>
-  import Terminal from "vue-web-terminal"
-
-  export default {
-    name: 'App',
-    components: {Terminal},
-    methods: {
-      onExecCmd(key, command, success, failed) {
-        if (key === 'fail') {
-          failed('Something wrong!!!')
-        } else {
-          let allClass = ['success', 'error', 'system', 'info', 'warning'];
-
-          let clazz = allClass[Math.floor(Math.random() * allClass.length)];
-          success({
-            type: 'normal',
-            class: clazz,
-            tag: 'success',
-            content: command
-          })
-        }
-      }
-    }
-  }
-</script>
 
 <style>
   body, html, #app {
@@ -121,7 +116,7 @@ Example:
 
 # Contact Author
 
-I am a backend coder who happens to have some knowledge of frontend. I developed this plugin out of personal interest.
+I am a backend coder, and I know a little bit about frontend. This plugin was created out of my interest.
 
 If you have good ideas for code optimization or functions and are willing to contribute code, please submit [PR](https://github.com/tzfun/vue-web-terminal/pulls),
 If you have any questions about the use of the plugin or find bugs, please submit[issue](https://github.com/tzfun/vue-web-terminal/issues).

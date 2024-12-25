@@ -50,6 +50,9 @@
 
 # 快速上手
 
+> **Vue2**版本从 **2024年12月24日** 开始正式归档，不再提供维护更新，
+> 源码见 [vue2分支](https://github.com/tzfun/vue-web-terminal/tree/vue2)。
+
 npm安装vue-web-terminal，`2.x.x`版本对应vue2，`3.x.x`版本对应vue3，建议下载对应大版本的最新版。
 
 ```shell
@@ -75,37 +78,29 @@ const app = createApp(App).use(Terminal)
 使用示例
 
 ```vue
+<script setup>
+  import Terminal from "vue-web-terminal"
+  const onExecCmd = (key, command, success, failed) => {
+    if (key === 'fail') {
+      failed('Something wrong!!!')
+    } else {
+      let allClass = ['success', 'error', 'system', 'info', 'warning'];
+
+      let clazz = allClass[Math.floor(Math.random() * allClass.length)];
+      success({
+        type: 'normal',
+        class: clazz,
+        tag: 'success',
+        content: command
+      })
+    }
+  }
+</script>
 <template>
   <div id="app">
     <terminal name="my-terminal" @exec-cmd="onExecCmd"></terminal>
   </div>
 </template>
-
-<script>
-  import Terminal from "vue-web-terminal"
-
-  export default {
-    name: 'App',
-    components: {Terminal},
-    methods: {
-      onExecCmd(key, command, success, failed) {
-        if (key === 'fail') {
-          failed('Something wrong!!!')
-        } else {
-          let allClass = ['success', 'error', 'system', 'info', 'warning'];
-
-          let clazz = allClass[Math.floor(Math.random() * allClass.length)];
-          success({
-            type: 'normal',
-            class: clazz,
-            tag: '成功',
-            content: command
-          })
-        }
-      }
-    }
-  }
-</script>
 
 <style>
   body, html, #app {
@@ -119,7 +114,7 @@ const app = createApp(App).use(Terminal)
 
 # 联系作者
 
-我是一名后端Coder，恰巧对前端也会一点皮毛，个人兴趣开发了此插件，业余玩家请多指教。
+我是一名后端Coder，恰巧对前端也会一点，个人兴趣开发了此插件。
 
 如果对代码优化或功能有好的想法并乐意贡献代码欢迎提交[PR](https://github.com/tzfun/vue-web-terminal/pulls)
 ，对插件使用存在疑问或发现bug请提交[issue](https://github.com/tzfun/vue-web-terminal/issues)。
