@@ -107,7 +107,7 @@ export type TerminalElementInfo = {
 
 export type CommandSortHandlerFunc = (a: any, b: any) => number
 
-export type InputFilterFunc = (str1: string, str2: string, event: InputEvent) => string | null
+export type InputFilterFunc = (str1: string, str2: string, event: InputEvent | CompositionEvent) => string | null
 
 export type CommandFormatterFunc = (cmd: string) => string
 

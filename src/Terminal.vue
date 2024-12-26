@@ -220,6 +220,7 @@ const selectedTipCommand = computed<Command | null>(() => {
 
 const _name = ref<string>()
 const command = ref<string>("")
+const inputLock = ref(false)
 const cursorConf = reactive({
   defaultWidth: 7,
   width: 7,
@@ -1463,7 +1464,10 @@ const _calculateStringWidth = (str: string): number => {
   return width
 }
 
-const _onInput = _debounce((e: InputEvent) => {
+const _onInput = (e: InputEvent | CompositionEvent) => {
+  if (inputLock.value) {
+    return
+  }
   if (props.inputFilter) {
     let value = (e.target as HTMLInputElement).value
     let newStr = props.inputFilter(e.data, value, e)
@@ -1497,7 +1501,16 @@ const _onInput = _debounce((e: InputEvent) => {
     }
   })
   _jumpToBottom(true)
-}, 100)
+}
+
+const _onCompositionstart = () => {
+  inputLock.value = true
+}
+
+const _onCompositionend = (e: CompositionEvent) => {
+  inputLock.value = false
+  _onInput(e)
+}
 
 const _checkInputCursor = () => {
   let eIn = terminalCmdInputRef.value
@@ -2141,6 +2154,8 @@ defineExpose({
                     @keydown="_onInputKeydown"
                     @keyup="_onInputKeyup"
                     @input="_onInput"
+                    @compositionstart="_onCompositionstart"
+                    @compositionend="_onCompositionend"
                     @focusin="cursorConf.show = true"
                     @keyup.up.exact="_inputKeyUp"
                     @keyup.down.exact="_inputKeyDown"
