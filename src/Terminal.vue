@@ -1517,8 +1517,10 @@ const _onCompositionstart = () => {
 }
 
 const _onCompositionend = (e: CompositionEvent) => {
-  inputLock.value = false
-  _onInput(e)
+  setTimeout(() => {
+    inputLock.value = false
+    _onInput(e)
+  },100)
 }
 
 const _checkInputCursor = () => {

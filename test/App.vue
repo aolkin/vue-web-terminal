@@ -288,7 +288,7 @@ const onResize = (info: TerminalElementInfo, name: string) => {
 }
 
 const pushMessageBefore = (message: Message, name: string) => {
-  console.log(message, name)
+  console.debug(message, name)
 }
 
 const getCommand = () => {
