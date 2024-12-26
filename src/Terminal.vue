@@ -984,6 +984,9 @@ const _printHelp = (regExp: RegExp, srcStr: string) => {
 }
 
 const _inputEnter = (e: KeyboardEvent) => {
+  if (inputLock.value) {
+    return
+  }
   if (e.ctrlKey) {
     if (command.value.length > 0) {
       let cursorIdx = cursorConf.idx
@@ -1384,6 +1387,9 @@ const _cursorGoRight = () => {
 }
 
 const _inputKeyUp = () => {
+  if (inputLock.value) {
+    return
+  }
   if (tips.open) {
     let idx = tips.selectedIndex
     if (idx > 0) {
@@ -1398,6 +1404,9 @@ const _inputKeyUp = () => {
 }
 
 const _inputKeyDown = () => {
+  if (inputLock.value) {
+    return
+  }
   if (tips.open) {
     let idx = tips.selectedIndex
     if (idx < tips.items.length - 1) {
@@ -1520,6 +1529,9 @@ const _checkInputCursor = () => {
 }
 
 const _onInputKeydown = (e: KeyboardEvent) => {
+  if (inputLock.value) {
+    return
+  }
   let key = e.key.toLowerCase()
   if (key === 'arrowleft') {
     _checkInputCursor()
