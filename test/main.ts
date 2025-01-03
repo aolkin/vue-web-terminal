@@ -1,7 +1,7 @@
 // @ts-ignore
 import App from './App.vue'
 import {createApp} from "vue";
-import {Terminal, configTheme} from '~/index'
+import Terminal, { configTheme } from '../src/index'
 
 const app = createApp(App)
 app.use(Terminal)

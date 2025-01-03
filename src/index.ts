@@ -8,14 +8,15 @@ import TerminalApi, {configCodemirror, configHighlight, configTheme, setOptions}
 import Terminal from "./Terminal.vue"
 import {Options, TerminalAsk, TerminalFlash} from "./types"
 
-Terminal.install = (app: App, options: Options): void => {
-    setOptions(options)
-    //  兼容老版本
-    Terminal.$api = TerminalApi
-    Terminal.$Flash = TerminalFlash
-    Terminal.$Ask = TerminalAsk
+const install = (app: App, options?: Options): void => {
+    if (options) {
+        setOptions(options)
+    }
     app.component(Terminal.__name as string, Terminal)
 }
+
+//  兼容老版本
+Terminal.install = install
 
 export * from './types'
 
@@ -30,9 +31,8 @@ export {
     configTheme
 }
 
-export default Terminal
+const VueWebTerminal = {
+    install
+}
 
-//  兼容老版本
-export const api = TerminalApi
-export const Flash = TerminalFlash
-export const Ask = TerminalAsk
+export default VueWebTerminal

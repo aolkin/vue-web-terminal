@@ -72,15 +72,18 @@ import Terminal from 'vue-web-terminal'
 Vue.use(Terminal)
 
 // for vue3
-const app = createApp(App).use(Terminal)
+const app = createApp(App)
+    .use(Terminal)
+    .mount('#app')
 ```
 
 使用示例
 
 ```vue
-<script setup>
-  import Terminal from "vue-web-terminal"
-  const onExecCmd = (key, command, success, failed) => {
+<script setup lang="ts">
+  import {Terminal, SuccessFunc, FailedFunc} from "vue-web-terminal"
+
+  const onExecCmd = (key: string, command: string, success: SuccessFunc, failed: FailedFunc) => {
     if (key === 'fail') {
       failed('Something wrong!!!')
     } else {
