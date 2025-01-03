@@ -32,6 +32,7 @@ import {
   _getByteLen,
   _getClipboardText,
   _getSelection,
+  _hash,
   _html,
   _isEmpty,
   _isPad,
@@ -43,12 +44,11 @@ import {
   _parsePixelFromValue,
   _pointInRect,
   _screenType,
-  _hash,
 } from "~/common/util.ts";
-import api, {getOptions, register, rename, unregister} from "~/common/api";
+import api, {getConfiguration, register, rename, unregister} from "~/common/api";
 import {DEFAULT_COMMANDS, WINDOW_STYLE} from "~/common/configuration.ts";
 import {_parseANSI} from "~/ansi";
-import store from "~/common/store";
+import {getStore} from "~/common/store";
 import THeader from "~/components/THeader.vue";
 import TViewerNormal from "~/components/TViewerNormal.vue";
 import TViewerJson from "~/components/TViewerJson.vue";
@@ -704,14 +704,14 @@ const getThemeStyleId = (salt: string): string => {
  * @param theme
  */
 const setTheme = (theme: string) => {
-  let customThemes = getOptions().themes
-  let themeStyle
+  let customThemes = getConfiguration().themes
+  let themeStyle: string
   if (customThemes && customThemes[theme]) {
     themeStyle = customThemes[theme]
   } else if (theme === 'dark') {
-    themeStyle = themeDark
+    themeStyle = themeDark as string
   } else if (theme === 'light') {
-    themeStyle = themeLight
+    themeStyle = themeLight as string
   } else {
     console.warn("The specified terminal theme style was not found:", theme)
     return
@@ -751,7 +751,7 @@ const changeThemeFlag = (newNameKey: string, oldNameKey: string) => {
 
 const _clearLog = (clearHistory: boolean) => {
   if (clearHistory) {
-    store.clear(getName())
+    getStore().clear(getName())
   } else {
     terminalLog.value = [];
     logSize.value = 0;
@@ -1304,7 +1304,7 @@ const _jumpToBottom = (enforce: boolean = false) => {
 const _saveCurCommand = () => {
   let cmd = command.value = command.value.trim()
   if (cmd.length > 0) {
-    store.push(getName(), cmd)
+    getStore().push(getName(), cmd)
   }
 
   let group = _newTerminalLogGroup()
@@ -1455,21 +1455,21 @@ const _switchTipsSelectedIdx = (idx: number) => {
 }
 
 const _switchPreCmd = () => {
-  let cmdLog = store.getLog(getName())
-  let cmdIdx = store.getIdx(getName())
+  let cmdLog = getStore().getLog(getName())
+  let cmdIdx = getStore().getIdx(getName())
   if (cmdLog.length !== 0 && cmdIdx > 0) {
     cmdIdx -= 1;
     command.value = cmdLog[cmdIdx] ? cmdLog[cmdIdx] : '';
   }
   _resetCursorPos()
-  store.setIdx(getName(), cmdIdx)
+  getStore().setIdx(getName(), cmdIdx)
   _searchCmd()
   _jumpToBottom(true)
 }
 
 const _switchNextCmd = () => {
-  let cmdLog = store.getLog(getName())
-  let cmdIdx = store.getIdx(getName())
+  let cmdLog = getStore().getLog(getName())
+  let cmdIdx = getStore().getIdx(getName())
   if (cmdLog.length !== 0 && cmdIdx < cmdLog.length - 1) {
     cmdIdx += 1;
     command.value = cmdLog[cmdIdx] ? cmdLog[cmdIdx] : '';
@@ -1478,7 +1478,7 @@ const _switchNextCmd = () => {
     command.value = '';
   }
   _resetCursorPos()
-  store.setIdx(getName(), cmdIdx)
+  getStore().setIdx(getName(), cmdIdx)
   _searchCmd()
   _jumpToBottom(true)
 }

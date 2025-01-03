@@ -1,8 +1,30 @@
+import {App} from "vue";
+
 export type TerminalMessageClass = 'success' | 'error' | 'info' | 'warning' | 'system'
 
 export type TerminalMessageType = 'cmdLine' | 'normal' | 'json' | 'code' | 'table' | 'html' | 'ansi'
 
 export type TerminalCursorStyle = 'block' | 'underline' | 'bar' | 'none'
+
+export interface VueWebTerminal {
+    install: (app: App) => void;
+    /**
+     * 自定义主题设置，也可以覆盖默认的 dark 和 light 主题
+     * @param theme 主题名
+     * @param css 主题css内容
+     */
+    configTheme: (theme: string, css: string) => void;
+    /**
+     * 配置 local storage 存储名
+     * @param name 存储名
+     */
+    configStoreName: (name: string) => void;
+    /**
+     * 配置每个Terminal实力存储的指令记录数量
+     * @param count
+     */
+    configMaxStoredCommandCountPerInstance: (count: number) => void;
+}
 
 export interface EditorConfig {
     open: boolean
@@ -21,7 +43,7 @@ export type Position = {
 export type DragConfig = {
     width: number | string
     height: number | string
-    zIndex?: string
+    zIndex?: number
     init?: Position
     pinned?: boolean
 }
@@ -53,10 +75,10 @@ export type CmdHistory = {
     cmdIdx: number
 }
 
-export type Options = {
-    highlight?: any
-    codemirror?: any
-    themes?: Record<string, string>
+export type TerminalConfiguration = {
+    storeName: string,
+    maxStoredCommandCountPerInstance: number,
+    themes: Record<string, string>,
 }
 
 export type MessageContentTable = {
@@ -182,91 +204,11 @@ export class TerminalFlash extends TerminalCallback {
     }
 }
 
-//  每个terminal实例最多保存100条记录
-const MAX_STORE_SIZE = 100
-const DEFAULT_STORAGE_KEY = 'terminal'
-
-export class TerminalStore {
-    storageKey: string = DEFAULT_STORAGE_KEY
-    dataMap: Object
-
-    constructor(key?: string) {
-        if (key) {
-            this.storageKey = key
-        }
-        let dataMapStr = window.localStorage.getItem(this.storageKey)
-        if (dataMapStr) {
-            this.dataMap = JSON.parse(dataMapStr)
-        } else {
-            this.dataMap = {}
-        }
-    }
-
-    push(name: string, cmd: string) {
-        let data = this.getData(name)
-        if (data.cmdLog == null) {
-            data.cmdLog = []
-        }
-        if (data.cmdLog.length === 0 || data.cmdLog[data.cmdLog.length - 1] !== cmd) {
-            data.cmdLog.push(cmd)
-
-            if (data.cmdLog.length > MAX_STORE_SIZE) {
-                data.cmdLog.splice(0, data.cmdLog.length - MAX_STORE_SIZE)
-            }
-        }
-
-        data.cmdIdx = data.cmdLog.length
-        this.store()
-    }
-
-    store() {
-        window.localStorage.setItem(this.storageKey, JSON.stringify(this.dataMap))
-    }
-
-    getData(name: string): CmdHistory {
-        let data = this.dataMap[name]
-        if (data == null) {
-            data = {}
-            this.dataMap[name] = data
-        }
-        return data
-    }
-
-    getLog(name: string) {
-        let data = this.getData(name)
-        if (!data.cmdLog) {
-            data.cmdLog = []
-        }
-        return data.cmdLog
-    }
-
-    clear(name: string) {
-        let data = this.getData(name)
-        data.cmdLog = []
-        data.cmdIdx = 0
-        this.store()
-    }
-
-    clearAll() {
-        this.dataMap = {}
-        this.store()
-    }
-
-    getIdx(name: string) {
-        let data = this.getData(name)
-        return data.cmdIdx | 0
-    }
-
-    setIdx(name: string, idx: number) {
-        this.getData(name).cmdIdx = idx
-    }
-}
-
 export interface TerminalApiData {
     pool: {
         [key: string]: TerminalApiListenerFunc
     },
-    options?: Options
+    configuration: TerminalConfiguration
 }
 
 export class TerminalApi {
@@ -315,7 +257,7 @@ export class TerminalApi {
         return this.post(name, 'execute', command)
     }
 
-    focus(name: string, enforce?: boolean):void {
+    focus(name: string, enforce?: boolean): void {
         this.post(name, 'focus', enforce)
     }
 

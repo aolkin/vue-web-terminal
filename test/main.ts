@@ -1,12 +1,17 @@
 // @ts-ignore
 import App from './App.vue'
 import {createApp} from "vue";
-import Terminal, { configTheme } from '../src/index'
+import { createTerminal } from '../src'
 
 const app = createApp(App)
-app.use(Terminal)
+
+const terminal = createTerminal()
+terminal.configStoreName("test-terminal")
+terminal.configMaxStoredCommandCountPerInstance(2)
 
 //  这行代码是一个错误示例
-// configTheme("custom", "s")
+// terminal.configTheme("custom", "s")
+
+app.use(terminal)
 
 app.mount('#app')

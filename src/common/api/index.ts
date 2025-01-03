@@ -1,10 +1,10 @@
-import {Options, TerminalApi, TerminalApiData, TerminalApiListenerFunc} from "~/types";
+import {TerminalApi, TerminalApiData, TerminalApiListenerFunc, TerminalConfiguration} from "~/types";
 
 const data: TerminalApiData = {
     pool: {},
-    options: {
-        highlight: null,
-        codemirror: null,
+    configuration: {
+        maxStoredCommandCountPerInstance: 100,
+        storeName: 'terminal',
         themes: {}
     }
 }
@@ -25,14 +25,6 @@ export function rename(newName: string, oldName: string, listener: TerminalApiLi
     register(newName, listener);
 }
 
-export function configHighlight(config: any) {
-    data.options.highlight = config
-}
-
-export function configCodemirror(config: any) {
-    data.options.codemirror = config
-}
-
 export function configTheme(theme: string, css: string) {
     let res = css.match(/^.*\{(.*)}\s*$/s)
     if (!res || res.length != 2) {
@@ -44,19 +36,28 @@ export function configTheme(theme: string, css: string) {
 }
         `)
     }
-    let themes = data.options.themes
+    let themes = data.configuration.themes
     if (!themes) {
-        data.options.themes = themes = {}
+        data.configuration.themes = themes = {}
     }
     themes[theme] = css
 }
 
-export function getOptions(): Options {
-    return data.options as Options
+export function configStoreName(name: string) {
+    data.configuration.storeName = name
+    console.debug("Configured storeName", name)
 }
 
-export function setOptions(op: Options) {
-    data.options = {...op}
+export function configMaxStoredCommandCountPerInstance(count: number) {
+    if (count <= 1) {
+        throw new Error("The value of 'maxStoredLogCountPerInstance' must be a valid positive number")
+    }
+    data.configuration.maxStoredCommandCountPerInstance = count
+    console.debug("Configured maxStoredCommandCountPerInstance", count)
+}
+
+export function getConfiguration(): TerminalConfiguration {
+    return data.configuration
 }
 
 export default new TerminalApi(data)
