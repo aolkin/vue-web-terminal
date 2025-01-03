@@ -36,6 +36,7 @@ export default defineConfig({
             entry: resolve(__dirname, 'src/index.ts'),
             //  暴露的全局变量
             name: 'Terminal',
+            fileName: 'vue-web-terminal'
         },
         outDir: 'lib',
         rollupOptions: {

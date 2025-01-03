@@ -1,7 +1,7 @@
 中文版 | [English](./README.md)
 
 <div align=center>
-<img src=public/logo.png/>
+<img src=shortcut/logo.png/>
 </div>
 
 # vue-web-terminal
@@ -34,7 +34,7 @@
 * 提供丰富的JS API，几乎所有功能均可由API来模拟非人为操作
 * 支持Vue2/Vue3
 
-![vue-web-terminal](./public/vue-web-terminal.gif)
+![vue-web-terminal](shortcut/vue-web-terminal.gif)
 
 > 一句话描述：
 >

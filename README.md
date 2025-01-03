@@ -1,7 +1,7 @@
 [中文版](./README_ZH.md) | English
 
 <div align=center>
-<img src=public/logo.png/>
+<img src=shortcut/logo.png/>
 </div>
 
 # vue-web-terminal
@@ -33,7 +33,7 @@ A web-side command line plugin built by `Vue`, supports multiple message formats
 * Provides a rich set of JS APIs, almost all functions can be simulated by APIs to simulate non-human operations
 * Supports Vue2/Vue3
 
-![vue-web-terminal](./public/vue-web-terminal.gif)
+![vue-web-terminal](shortcut/vue-web-terminal.gif)
 
 > Short description:
 >
