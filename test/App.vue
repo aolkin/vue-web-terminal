@@ -5,8 +5,8 @@
 
 // import '~/css/theme/light.css'
 // import '~/css/theme/dark.css'
-import {Terminal, TerminalApi, TerminalAsk, TerminalElementInfo} from '~/index'
-import {Command, FailedFunc, Message, SuccessFunc} from "~/types";
+import {Terminal, TerminalApi, TerminalAsk, TerminalElementInfo} from '../src/index'
+import {Command, FailedFunc, Message, SuccessFunc} from '../src/types';
 import {reactive, ref} from "vue";
 
 const commandStore: Array<Command> = [
@@ -336,6 +336,10 @@ const textAreaKeyDown = (e: KeyboardEvent) => {
 const textAreaKeyEnter = () => {
   console.log("input enter")
 }
+
+const focus = () => {
+  TerminalApi.focus(terminals.value[0].name, true)
+}
 </script>
 <template>
   <div id="app">
@@ -345,6 +349,7 @@ const textAreaKeyEnter = () => {
     <textarea v-model="testInputValue"
               @keydown="textAreaKeyDown"
               @keyup.enter="textAreaKeyEnter"/>
+    <button @click="focus">focus</button>
 
     <!--    <div style="width: 700px;height: 400px;margin-left: 150px;margin-top: 300px">-->
     <!--      <terminal-->

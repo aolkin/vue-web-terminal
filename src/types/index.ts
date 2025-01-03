@@ -284,64 +284,71 @@ export class TerminalApi {
         }
     }
 
-    pushMessage(name: string, options: Message | Array<Message> | string) {
-        return this.post(name, 'pushMessage', options)
+    pushMessage(name: string, message: Message | Array<Message> | string): void {
+        this.post(name, 'pushMessage', message)
     }
 
-    appendMessage(name: string, options: string) {
-        return this.post(name, 'appendMessage', options)
+    appendMessage(name: string, message: string): void {
+        this.post(name, 'appendMessage', message)
     }
 
-    fullscreen(name: string) {
-        return this.post(name, "fullscreen")
+    fullscreen(name: string): void {
+        this.post(name, "fullscreen")
     }
 
-    isFullscreen(name: string) {
+    isFullscreen(name: string): boolean {
         return this.post(name, 'isFullscreen')
     }
 
-    dragging(name: string, options: Position) {
-        return this.post(name, 'dragging', options)
+    dragging(name: string, position: Position): void {
+        this.post(name, 'dragging', position)
     }
 
-    execute(name: string, options: string) {
-        return this.post(name, 'execute', options)
+    /**
+     * Simulate trigger execution instructions
+     *
+     * @param name name of terminal
+     * @param command content of the command
+     * @return { boolean } Trigger success
+     */
+    execute(name: string, command: string): boolean {
+        return this.post(name, 'execute', command)
     }
 
-    focus(name: string, options: boolean) {
-        return this.post(name, 'focus', options)
+    focus(name: string, enforce?: boolean):void {
+        this.post(name, 'focus', enforce)
     }
 
-    elementInfo(name: string) {
+    elementInfo(name: string): TerminalElementInfo {
         return this.post(name, 'elementInfo')
     }
 
-    textEditorOpen(name: string, options?: EditorSetting) {
-        return this.post(name, 'textEditorOpen', options)
+    textEditorOpen(name: string, setting?: EditorSetting): void {
+        this.post(name, 'textEditorOpen', setting)
     }
 
-    textEditorClose(name: string, options?: any): string | any {
-        return this.post(name, 'textEditorClose', options)
+    textEditorClose(name: string, closeCallbackParams?: any): string | undefined {
+        return this.post(name, 'textEditorClose', closeCallbackParams)
     }
 
-    clearLog(name: string, options?: any): any {
-        return this.post(name, 'clearLog', options)
+    clearLog(name: string, clearHistory?: boolean): void {
+        this.post(name, 'clearLog', clearHistory)
     }
 
-    getCommand(name: string, options?: any): string {
-        return this.post(name, 'getCommand', options)
+    getCommand(name: string): string {
+        return this.post(name, 'getCommand')
     }
 
-    setCommand(name: string, options?: any): string | any {
-        return this.post(name, 'setCommand', options)
+    setCommand(name: string, newCommand: string): void {
+        this.post(name, 'setCommand', newCommand)
     }
 
-    switchAllFoldState(name: string, options: boolean): any {
-        return this.post(name, 'switchAllFoldState', options)
+    switchAllFoldState(name: string, foldStat: boolean): number {
+        return this.post(name, 'switchAllFoldState', foldStat)
     }
 
-    jumpToBottom(name: string, options: boolean): any {
-        return this.post(name, 'jumpToBottom', options)
+    jumpToBottom(name: string, enforce: boolean): void {
+        this.post(name, 'jumpToBottom', enforce)
     }
 }
 

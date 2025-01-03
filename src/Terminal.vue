@@ -345,12 +345,19 @@ onMounted(() => {
 
   let selectContentText = null
 
-  _eventOn(window, "click", clickListener.value = e => {
+  _eventOn(window, "click", clickListener.value = (e) => {
+    const beforeActive = isActive.value
     let activeCursor = false
     let container = terminalContainerRef.value
-    if (container && container.getBoundingClientRect && _pointInRect(e, container.getBoundingClientRect())) {
-      activeCursor = _isParentDom(e.target, container, "t-container")
-          || (e.target && e.target.classList.contains('t-text-editor-floor-btn'))
+    if (container && container.getBoundingClientRect) {
+      //  点击在窗口区域内
+      if (_pointInRect(e, container.getBoundingClientRect())) {
+        activeCursor = _isParentDom(e.target, container, "t-container")
+            || (e.target && e.target.classList.contains('t-text-editor-floor-btn'))
+      } else if (!beforeActive) {
+        //  在窗口区域之外并且当前窗口不活跃时，忽略掉此事件
+        return
+      }
     }
 
     if (isBlockCommandFocus.value) {
@@ -360,10 +367,14 @@ onMounted(() => {
     }
 
     if (activeCursor) {
-      _onActive()
+      if (!beforeActive) {
+        _onActive()
+      }
     } else {
       _closeTips(false)
-      _onInactive()
+      if (beforeActive) {
+        _onInactive()
+      }
     }
   })
 
@@ -531,7 +542,7 @@ onMounted(() => {
       return fullscreenState.value
     } else if (type === 'dragging') {
       if (draggable.value) {
-        _dragging(options.x, options.y)
+        _dragging(options as Position)
       } else {
         console.warn("Terminal is not draggable: " + getName())
       }
@@ -539,6 +550,9 @@ onMounted(() => {
       if (!isBlockCommandFocus.value && _nonEmpty(options)) {
         command.value = options.trim()
         _execute()
+        return true
+      } else {
+        return false
       }
     } else if (type === 'focus') {
       _focus(options)
@@ -558,7 +572,7 @@ onMounted(() => {
     } else if (type === 'getCommand') {
       return _getCommand()
     } else if (type === 'setCommand') {
-      return _setCommand(options)
+      return _setCommand(options as string)
     } else if (type === 'switchAllFoldState') {
       return _switchAllFoldState(options)
     } else if (type === 'jumpToBottom') {
@@ -903,8 +917,12 @@ const _focus = (enforceFocus?: boolean | MouseEvent) => {
       if (enforceFocus === true) {
         input = terminalCmdInputRef.value
       }
-      cursorConf.show = true
+      //  可能会和点击事件冲突，这里延迟执行
+      setTimeout(() => {
+        cursorConf.show = true
+      })
     }
+
     if (input) {
       input.focus()
     }
@@ -1267,8 +1285,8 @@ const _appendMessage = (message: string) => {
   }
 }
 
-const _jumpToBottom = (force: boolean = false) => {
-  if (!force && !forceScrollToBottom.value) {
+const _jumpToBottom = (enforce: boolean = false) => {
+  if (!enforce && !forceScrollToBottom.value) {
     return
   }
   nextTick(() => {
@@ -1692,7 +1710,10 @@ const _initDrag = () => {
     if (isDragging) {
       let moveX = evt.clientX - mouseOffsetX;
       let moveY = evt.clientY - mouseOffsetY;
-      _dragging(moveX, moveY)
+      _dragging({
+        x: moveX,
+        y: moveY
+      })
     } else if (isResize) {
       let cx = evt.clientX - resizeData.cursorX
       let cy = evt.clientY - resizeData.cursorY
@@ -1746,10 +1767,12 @@ const _initDrag = () => {
   })
 }
 
-const _dragging = (x: number, y: number) => {
+const _dragging = (pos: Position) => {
   if (isPinned.value) {
     return
   }
+  const x = pos.x
+  const y = pos.y
   let clientWidth = document.body.clientWidth
   let clientHeight = document.body.clientHeight
   let container = terminalContainerRef.value
@@ -1829,7 +1852,7 @@ const _getCommand = () => {
   return command.value
 }
 
-const _setCommand = (cmd: any) => {
+const _setCommand = (cmd: string) => {
   if (ask.open) {
     console.error("Cannot call 'setCommand' api in ask mode")
     return
@@ -1840,13 +1863,13 @@ const _setCommand = (cmd: any) => {
     console.error("Cannot call 'setCommand' api in flash mode")
     return
   }
-  if (cmd) {
-    command.value = cmd.toString()
+  if (typeof cmd === 'string') {
+    command.value = cmd.trim()
     nextTick(() => {
       _resetCursorPos()
     })
   } else {
-    console.warn("The parameter received by the 'setCommand' api is undefined")
+    console.warn("Type error, the parameter received by the 'setCommand' api is " + (typeof cmd) + ", expected string")
   }
 }
 
@@ -2048,8 +2071,11 @@ defineExpose({
     </div>
 
     <div class="terminal">
-      <div class="t-header-container" ref="terminalHeaderRef" v-if="showHeader"
-           :style="draggable ? 'cursor: move;' : ''" @dblclick="_fullscreen">
+      <div class="t-header-container"
+           ref="terminalHeaderRef"
+           v-if="showHeader"
+           :style="draggable ? 'cursor: move;' : ''"
+           @dblclick="_fullscreen">
         <slot name="header">
           <t-header :title="title"
                     :pinned="isPinned"
@@ -2059,18 +2085,28 @@ defineExpose({
         </slot>
       </div>
       <div class="t-window"
-           :style="`${showHeader ? `height:calc(100% - ${headerHeight}px);margin-top: ${headerHeight}px;` : 'height:100%'};
-           padding:${WINDOW_STYLE.PADDING_TOP}px ${WINDOW_STYLE.PADDING_RIGHT}px ${WINDOW_STYLE.PADDING_BOTTOM}px ${enableFold ? WINDOW_STYLE.PADDING_LEFT_FOLD : WINDOW_STYLE.PADDING_LEFT}px;`"
+           :style="`
+           ${showHeader ? `height:calc(100% - ${headerHeight}px);
+           margin-top: ${headerHeight}px;` : 'height:100%'};
+           padding:${WINDOW_STYLE.PADDING_TOP}px ${WINDOW_STYLE.PADDING_RIGHT}px ${WINDOW_STYLE.PADDING_BOTTOM}px ${enableFold ? WINDOW_STYLE.PADDING_LEFT_FOLD : WINDOW_STYLE.PADDING_LEFT}px;
+           `"
            ref="terminalWindowRef"
            @click="_focus"
            @dblclick="_focus(true)">
         <div v-for="(group,groupIdx) in terminalLog"
              :key="groupIdx"
-             :class="`t-log-box t-log-fold-container ${enableHoverStripe && group.logs.length > 1 ? 't-log-box-hover-script' : ''} ${group.fold ? 't-log-box-folded' : ''}`"
+             :class="`
+             t-log-box
+             t-log-fold-container
+             ${enableHoverStripe && group.logs.length > 1 ? 't-log-box-hover-script' : ''}
+             ${group.fold ? 't-log-box-folded' : ''}
+             `"
              :style="`margin-top:${lineSpace}px;`">
           <span v-if="_enableFold(group)">
             <slot name="folder" :group="group">
-              <span class="t-log-fold-icon t-log-fold-icon-active" v-if="group.fold" @click="_closeGroupFold(group)">+</span>
+              <span class="t-log-fold-icon t-log-fold-icon-active"
+                    v-if="group.fold"
+                    @click="_closeGroupFold(group)">+</span>
               <span class="t-log-fold-icon" v-else @click="group.fold = true">-</span>
               <span class="t-log-fold-line" v-if="!group.fold"/>
             </slot>
