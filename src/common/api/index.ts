@@ -1,4 +1,5 @@
 import {TerminalApi, TerminalApiData, TerminalApiListenerFunc, TerminalConfiguration} from "~/types";
+import {_isEmpty} from "~/common/util.ts";
 
 const data: TerminalApiData = {
     pool: {},
@@ -44,13 +45,16 @@ export function configTheme(theme: string, css: string) {
 }
 
 export function configStoreName(name: string) {
+    if (_isEmpty(name)) {
+        throw new Error("The terminal storage name is invalid: " + name)
+    }
     data.configuration.storeName = name
     console.debug("Configured storeName", name)
 }
 
 export function configMaxStoredCommandCountPerInstance(count: number) {
     if (count <= 1) {
-        throw new Error("The value of 'maxStoredLogCountPerInstance' must be a valid positive number")
+        throw new Error("The value of 'maxStoredLogCountPerInstance' must be a valid positive number: " + count)
     }
     data.configuration.maxStoredCommandCountPerInstance = count
     console.debug("Configured maxStoredCommandCountPerInstance", count)

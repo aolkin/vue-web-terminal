@@ -22,7 +22,6 @@ A web-side command line plugin built by `Vue`, supports multiple message formats
 * Supports real-time content display and appending, and can create simple animation effects
 * Support user question and answer input
 * Support online text editing
-* Support Highlight, Codemirror code highlighting
 * Support window dragging and fixing
 * Support ← → cursor key switching and ↑ ↓ key history command switching
 * Support fullscreen
@@ -65,18 +64,24 @@ npm install vue-web-terminal@2.xx --save
 npm install vue-web-terminal@3.xx --save 
 ```
 
-Use Terminal plugin in `main.js`
+Use Terminal plugin in `main`
 
+**Vue2**
 ```js
 import Terminal from 'vue-web-terminal'
 
-// for vue2
 Vue.use(Terminal)
+```
 
-// for vue3
+**Vue3**
+```ts
+import { createTerminal } from 'vue-web-terminal'
+
 const app = createApp(App)
-    .use(Terminal)
-    .mount('#app')
+
+app.use(createTerminal())
+
+app.mount('#app')
 ```
 
 Example:

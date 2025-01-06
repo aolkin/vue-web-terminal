@@ -23,7 +23,6 @@
 * 支持内容实时回显、追加，可制作简单的动画效果
 * 支持用户问答输入
 * 支持在线文本编辑
-* 支持Highlight、Codemirror代码高亮
 * 支持窗口拖拽、固定
 * 支持 ← → 光标键切换和 ↑ ↓ 键历史命令切换
 * 支持一键全屏
@@ -63,18 +62,24 @@ npm install vue-web-terminal@2.xx --save
 npm install vue-web-terminal@3.xx --save 
 ```
 
-main.js中载入 Terminal 插件
+`main`中载入 Terminal 插件
 
+**Vue2**
 ```js
 import Terminal from 'vue-web-terminal'
 
-// for vue2
 Vue.use(Terminal)
+```
 
-// for vue3
+**Vue3**
+```ts
+import { createTerminal } from 'vue-web-terminal'
+
 const app = createApp(App)
-    .use(Terminal)
-    .mount('#app')
+
+app.use(createTerminal())
+
+app.mount('#app')
 ```
 
 使用示例
