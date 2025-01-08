@@ -782,6 +782,7 @@ const _calculateByteLen = () => {
       byteLen.cn = terminalCnFlagRef.value.getBoundingClientRect().width / 10
 
       cursorConf.defaultWidth = byteLen.en
+      cursorConf.width = byteLen.en
       byteLen.init = true
     }
   }
@@ -1463,7 +1464,6 @@ const _switchPreCmd = () => {
   }
   _resetCursorPos()
   getStore().setIdx(getName(), cmdIdx)
-  _searchCmd()
   _jumpToBottom(true)
 }
 
@@ -1479,7 +1479,6 @@ const _switchNextCmd = () => {
   }
   _resetCursorPos()
   getStore().setIdx(getName(), cmdIdx)
-  _searchCmd()
   _jumpToBottom(true)
 }
 
