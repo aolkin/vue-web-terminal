@@ -22,6 +22,7 @@ defineExpose({
        ref="terminalHelpBoxRef"
        :style="`top: ${top}px;max-height: calc(100% - ${top}px);`">
     <div class="t-cmd-help-des" v-if="content.description" v-html="content.description"/>
+    <p v-if="content.usage">Usage: <code class="t-code-inline">{{ content.usage }}</code></p>
     <div v-if="content.example && content.example.length > 0">
       <div v-for="(it,idx) in content.example" :key="idx" class="text">
         <div v-if="content.example.length === 1">
