@@ -401,7 +401,7 @@ onMounted(() => {
             _setCursorIdx(0)
 
             event.preventDefault()
-          } else if(key == 'end') {
+          } else if (key == 'end') {
             _setCursorIdx(terminalCmdInputRef.value.value.length)
 
             event.preventDefault()
@@ -577,6 +577,8 @@ onMounted(() => {
       return _switchAllFoldState(options)
     } else if (type === 'jumpToBottom') {
       return _jumpToBottom(options)
+    } else if (type === 'getOutputs') {
+      return terminalLog.value
     } else {
       console.error(`Unsupported event type ${type} in instance ${getName()}`)
     }
@@ -685,7 +687,7 @@ const updateHeaderHeight = () => {
   })
 }
 
-const getName = ():string => {
+const getName = (): string => {
   if (props.name) {
     return props.name;
   }
@@ -1537,7 +1539,7 @@ const _onCompositionend = (e: CompositionEvent) => {
   setTimeout(() => {
     inputLock.value = false
     _onInput(e)
-  },100)
+  }, 100)
 }
 
 const _checkInputCursor = () => {
@@ -2052,7 +2054,10 @@ defineExpose({
   getCommand: _getCommand,
   setCommand: _setCommand,
   switchAllFoldState: _switchAllFoldState,
-  jumpToBottom: _jumpToBottom
+  jumpToBottom: _jumpToBottom,
+  getOutputs: (): MessageGroup[] => {
+    return terminalLog.value
+  }
 })
 
 </script>

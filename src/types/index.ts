@@ -292,6 +292,10 @@ export class TerminalApi {
     jumpToBottom(name: string, enforce: boolean): void {
         this.post(name, 'jumpToBottom', enforce)
     }
+
+    getOutputs(name: string): MessageGroup[] {
+        return this.post(name, 'getOutputs')
+    }
 }
 
 export interface EditorSetting {
