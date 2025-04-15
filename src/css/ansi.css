@@ -221,8 +221,9 @@
     min-width: 7px;
     min-height: var(--t-font-height);
     font-size: inherit;
-    display: inline-block;
+    display: inline;
     height: 100%;
     vertical-align: top;
     font-weight: bold;
+    word-break: break-all;
 }
