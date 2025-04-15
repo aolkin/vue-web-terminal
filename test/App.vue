@@ -188,7 +188,8 @@ const onExecCmd = (key: string, command: string, success: SuccessFunc, failed: F
         ansiContent += ('\x1B[48;5;' + i + 'm \x1B[0m')
       }
 
-      ansiContent += `\nfinished ${i}`
+      ansiContent += `\nfinished ${i}\n`
+      ansiContent += `\tTab ${i} \t 123`
       TerminalApi.pushMessage(name, {
         type: 'ansi',
         content: ansiContent

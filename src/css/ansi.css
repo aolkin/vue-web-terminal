@@ -226,4 +226,5 @@
     vertical-align: top;
     font-weight: bold;
     word-break: break-all;
+    white-space: pre-wrap;
 }
