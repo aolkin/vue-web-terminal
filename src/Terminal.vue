@@ -1651,7 +1651,7 @@ const _initDrag = () => {
 
   let dragArea = terminalHeaderRef.value
   let box = terminalContainerRef.value
-  let window = terminalWindowRef.value
+  let terminalWindow = terminalWindowRef.value
 
   let isDragging = false;
   let isResize = false;
@@ -1669,7 +1669,7 @@ const _initDrag = () => {
 
   const storeResizeData = (type: string, evt: MouseEvent) => {
     isResize = true
-    window.style['user-select'] = 'none'
+    terminalWindow.style['user-select'] = 'none'
     resizeData.type = type
     resizeData.cursorX = evt.clientX
     resizeData.cursorY = evt.clientY
@@ -1678,6 +1678,12 @@ const _initDrag = () => {
     resizeData.boxWidth = box.clientWidth
     resizeData.boxHeight = box.clientHeight
   }
+
+  // _eventOn(dragArea, 'dragstart', (evt:DragEvent) => {
+  // })
+  //
+  // _eventOn(dragArea, 'drag', (evt:DragEvent) => {
+  // })
 
   _eventOn(dragArea, 'mousedown', (evt: MouseEvent) => {
     if (fullscreenState.value) {
@@ -1688,7 +1694,7 @@ const _initDrag = () => {
     mouseOffsetY = evt.clientY - box.offsetTop;
 
     isDragging = true
-    window.style['user-select'] = 'none'
+    terminalWindow.style['user-select'] = 'none'
   })
 
   _eventOn(resizeLTRef.value, 'mousedown', (evt: MouseEvent) => {
@@ -1708,6 +1714,8 @@ const _initDrag = () => {
     if (isPinned.value || fullscreenState.value) {
       return
     }
+    evt.preventDefault()
+    window.getSelection().removeAllRanges()
     if (isDragging) {
       let moveX = evt.clientX - mouseOffsetX;
       let moveY = evt.clientY - mouseOffsetY;
@@ -1764,7 +1772,7 @@ const _initDrag = () => {
     }
     isDragging = false
     isResize = false
-    window.style['user-select'] = 'unset'
+    terminalWindow.style['user-select'] = 'unset'
   })
 }
 
