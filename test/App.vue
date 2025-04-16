@@ -175,26 +175,7 @@ const onExecCmd = (key: string, command: string, success: SuccessFunc, failed: F
     if (args.length > 1) {
       loop = parseInt(args[1])
     }
-    for (let i = 0; i < loop; i++) {
-      let ansiContent = 'vue-wen-terminal 支持 ANSI 码的着色解码功能，但暂不支持其他的光标、设备、窗口控制等，默认会将不支持的 ANSI 码过滤。\n\n\x1B[1;34mThis are some blue text.\x1B[0m\n\x1B[30;43mThis is a line of text with a background color.\x1B[0m\n\x1B[92;5mThis is blink text.\x1B[0m\n'
-
-      ansiContent += '\nThis is xterm-256-color content:\n'
-      for (let i = 0; i < 256; i++) {
-        ansiContent += ('\x1B[38;5;' + i + 'mV\x1B[0m')
-      }
-
-      ansiContent += '\n\nThis is xterm-256-color background content:\n'
-      for (let i = 0; i < 256; i++) {
-        ansiContent += ('\x1B[48;5;' + i + 'm \x1B[0m')
-      }
-
-      ansiContent += `\nfinished ${i}\n`
-      ansiContent += `\tTab ${i} \t 123`
-      TerminalApi.pushMessage(name, {
-        type: 'ansi',
-        content: ansiContent
-      })
-    }
+    ansiLoop(name, loop)
 
     success()
   } else if (key === 'edit') {
@@ -263,8 +244,33 @@ const onExecCmd = (key: string, command: string, success: SuccessFunc, failed: F
       }
     })
     success()
+  } else if (key === 'clean') {
+    ansiLoop(name, 10)
   } else {
     failed("Unknown command: " + key)
+  }
+}
+
+const ansiLoop = (name: string, loop: number) => {
+  for (let i = 0; i < loop; i++) {
+    let ansiContent = 'vue-wen-terminal 支持 ANSI 码的着色解码功能，但暂不支持其他的光标、设备、窗口控制等，默认会将不支持的 ANSI 码过滤。\n\n\x1B[1;34mThis are some blue text.\x1B[0m\n\x1B[30;43mThis is a line of text with a background color.\x1B[0m\n\x1B[92;5mThis is blink text.\x1B[0m\n'
+
+    ansiContent += '\nThis is xterm-256-color content:\n'
+    for (let i = 0; i < 256; i++) {
+      ansiContent += ('\x1B[38;5;' + i + 'mV\x1B[0m')
+    }
+
+    ansiContent += '\n\nThis is xterm-256-color background content:\n'
+    for (let i = 0; i < 256; i++) {
+      ansiContent += ('\x1B[48;5;' + i + 'm \x1B[0m')
+    }
+
+    ansiContent += `\nfinished ${i}\n`
+    ansiContent += `\tTab ${i} \t 123`
+    TerminalApi.pushMessage(name, {
+      type: 'ansi',
+      content: ansiContent
+    })
   }
 }
 
@@ -298,6 +304,10 @@ const getCommand = () => {
 
 const setCommand = () => {
   TerminalApi.setCommand(terminals.value[0].name, "The custom command -a xxx")
+}
+
+const jumpToBottom = () => {
+  TerminalApi.jumpToBottom(terminals.value[0].name, true)
 }
 
 const closeWindow = (name: string, remove: boolean = false) => {
@@ -347,6 +357,7 @@ const focus = () => {
 
     <button @click="getCommand">get command</button>
     <button @click="setCommand">set command</button>
+    <button @click="jumpToBottom">jump to bottom</button>
     <textarea v-model="testInputValue"
               @keydown="textAreaKeyDown"
               @keyup.enter="textAreaKeyEnter"/>

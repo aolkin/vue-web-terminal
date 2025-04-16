@@ -1294,13 +1294,12 @@ const _jumpToBottom = (enforce: boolean = false) => {
   }
   nextTick(() => {
     let box = terminalWindowRef.value
-    if (box != null) {
+    if (box) {
       box.scrollTo({
-        top: box.scrollHeight,
+        top: box.scrollHeight + 100,
         behavior: props.scrollMode
       })
     }
-  }).then(() => {
   })
 }
 
@@ -1591,6 +1590,8 @@ const _fullscreen = () => {
       dom.mozCancelFullScreen();
     } else if (dom.msExitFullscreen) {
       dom.msExitFullscreen();
+    } else {
+      return
     }
   } else {
     if (fullArea.requestFullscreen) {
@@ -1602,6 +1603,8 @@ const _fullscreen = () => {
     } else if (fullArea.msRequestFullscreen) {
       // IE11
       fullArea.msRequestFullscreen();
+    } else {
+      return
     }
   }
   fullscreenState.value = !fullscreenState.value
@@ -1694,7 +1697,6 @@ const _initDrag = () => {
     mouseOffsetY = evt.clientY - box.offsetTop;
 
     isDragging = true
-    terminalWindow.style['user-select'] = 'none'
   })
 
   _eventOn(resizeLTRef.value, 'mousedown', (evt: MouseEvent) => {
@@ -1714,9 +1716,10 @@ const _initDrag = () => {
     if (isPinned.value || fullscreenState.value) {
       return
     }
-    evt.preventDefault()
-    window.getSelection().removeAllRanges()
+
     if (isDragging) {
+      evt.preventDefault()
+      window.getSelection().removeAllRanges()
       let moveX = evt.clientX - mouseOffsetX;
       let moveY = evt.clientY - mouseOffsetY;
       _dragging({
@@ -1724,6 +1727,8 @@ const _initDrag = () => {
         y: moveY
       })
     } else if (isResize) {
+      evt.preventDefault()
+      window.getSelection().removeAllRanges()
       let cx = evt.clientX - resizeData.cursorX
       let cy = evt.clientY - resizeData.cursorY
       //  右下
@@ -1772,7 +1777,6 @@ const _initDrag = () => {
     }
     isDragging = false
     isResize = false
-    terminalWindow.style['user-select'] = 'unset'
   })
 }
 
