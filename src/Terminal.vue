@@ -705,7 +705,17 @@ const getThemeStyleId = (salt: string): string => {
  * 设置主题
  * @param theme
  */
-const setTheme = (theme: string) => {
+const setTheme = (theme: string | undefined) => {
+  let terminalNameKey = _hash(getName())
+  let tagId = getThemeStyleId(terminalNameKey)
+  let styleTag = document.getElementById(tagId)
+
+  if (theme === 'none') {
+    if (styleTag) {
+      styleTag.remove()
+    }
+  }
+
   let customThemes = getConfiguration().themes
   let themeStyle: string
   if (customThemes && customThemes[theme]) {
@@ -720,12 +730,9 @@ const setTheme = (theme: string) => {
   }
   let css = themeStyle.match(/^.*\{(.*)}\s*$/s)[1]
 
-  let terminalNameKey = _hash(getName())
 
   themeStyle = `.t-container[t-data-key="${terminalNameKey}"] { ${css} }`
 
-  let tagId = getThemeStyleId(terminalNameKey)
-  let styleTag = document.getElementById(tagId)
   if (styleTag) {
     styleTag.innerHTML = themeStyle
   } else {
@@ -1310,9 +1317,12 @@ const _saveCurCommand = () => {
   }
 
   let group = _newTerminalLogGroup()
+  const prompt = terminalInputPromptRef.value
+    ? terminalInputPromptRef.value.innerHTML
+    : _html(props.context) + props.contextSuffix
   group.logs.push({
     type: "cmdLine",
-    content: `${_html(props.context)}${props.contextSuffix}${_commandFormatter(cmd)}`
+    content: `${prompt}${_commandFormatter(cmd)}`,
   });
   _jumpToBottom()
 }
@@ -2186,8 +2196,10 @@ defineExpose({
            v-show="showInputLine"
            :style="`margin-top:${lineSpace}px;`">
           <span class="t-prompt t-cmd-line-content" ref="terminalInputPromptRef">
-            <span>{{ context }}</span>
-            <span>{{ contextSuffix }}</span>
+            <slot name="prompt">
+              <span>{{ context }}</span>
+              <span>{{ contextSuffix }}</span>
+            </slot>
           </span><span class="t-cmd-line-content" v-html="_commandFormatter(command)"></span><span
             v-show="cursorConf.show"
             :class="`t-cursor t-disable-select t-cursor-${cursorStyle} ${enableCursorBlink ? 't-cursor-blink' : ''}`"

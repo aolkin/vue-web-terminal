@@ -1,4 +1,6 @@
 :root {
+    --t-font-family: Monaco, "Lucida Console", monospace;
+    --t-tips-font-family: system-ui;
     /*限定字体高度*/
     --t-font-height: 19px;
     /*限定字体大小*/
@@ -124,7 +126,7 @@
 .t-window div,
 .t-crude-font {
     font-size: var(--t-font-size);
-    font-family: Monaco, "Lucida Console", monospace;
+    font-family: var(--t-font-family);
 }
 
 .t-window {
@@ -620,7 +622,7 @@
     -moz-box-shadow: var(--t-cmd-tips-box-shadow);
     -webkit-box-shadow: var(--t-cmd-tips-box-shadow);
     -o-box-shadow: var(--t-cmd-tips-box-shadow);
-    font-family: system-ui;
+    font-family: var(--t-tips-font-family);
 }
 
 .t-cmd-tips-items {
