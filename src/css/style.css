@@ -168,10 +168,10 @@
 }
 
 .t-window .t-cursor-blink {
-    animation: cursor-flash 1s infinite;
-    -webkit-animation: cursor-flash 1s infinite;
-    -o-animation: cursor-flash 1s infinite;
-    -moz-animation: cursor-flash 1s infinite;
+    animation: cursor-flash 1s steps(1) infinite;
+    -webkit-animation: cursor-flash 1s steps(1) infinite;
+    -o-animation: cursor-flash 1s steps(1) infinite;
+    -moz-animation: cursor-flash 1s steps(1) infinite;
 }
 
 .t-window .t-cursor-block {
