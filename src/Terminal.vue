@@ -11,8 +11,6 @@ import {
   FailedFunc,
   InputFilterFunc,
   InputTipItem,
-  InputTipsSearchHandlerFunc,
-  InputTipsSelectHandlerFunc,
   AutocompleteHookFunc,
   Message,
   MessageGroup,
@@ -166,11 +164,7 @@ const props = defineProps({
     type: Boolean,
     default: () => true
   },
-  //  提示选择处理函数
-  inputTipsSelectHandler: Function as PropType<InputTipsSelectHandlerFunc>,
-  //  用户自定义命令搜索提示实现
-  inputTipsSearchHandler: Function as PropType<InputTipsSearchHandlerFunc>,
-  //  Hook-based autocomplete handler - comprehensive approach
+  //  Hook-based autocomplete handler
   autocompleteHandler: Function as PropType<AutocompleteHookFunc>,
   //  主题
   theme: {
@@ -816,7 +810,7 @@ const _searchCmd = (inputData?: string | null) => {
     return
   }
 
-  //  Hook-based autocomplete handler (highest priority)
+  //  Hook-based autocomplete handler
   if (props.autocompleteHandler) {
     props.autocompleteHandler(inputData || null, command.value, cursorConf.idx, (items: InputTipItem[], openTips?: boolean) => {
       _updateTipsItems(items, openTips)
@@ -824,14 +818,7 @@ const _searchCmd = (inputData?: string | null) => {
     return
   }
 
-  //  用户自定义搜索实现 (legacy support)
-  if (props.inputTipsSearchHandler) {
-    props.inputTipsSearchHandler(command.value, cursorConf.idx, allCommandStore.value, (items: InputTipItem[], openTips?: boolean) => {
-      _updateTipsItems(items, openTips)
-    })
-    return
-  }
-
+  // Default built-in autocomplete behavior
   let firstSpaceIdx = command.value.indexOf(' ')
   let cursorInKey = firstSpaceIdx <= 0 || cursorConf.idx <= firstSpaceIdx
 
@@ -2010,18 +1997,6 @@ const _selectTips = () => {
     return
   }
   let selectedItem = tips.items[tips.selectedIndex]
-  if (props.inputTipsSelectHandler) {
-    props.inputTipsSelectHandler(command.value, cursorConf.idx, selectedItem, (newCommand: string) => {
-      if (newCommand && typeof newCommand === 'string') {
-        command.value = newCommand
-        _resetCursorPos()
-        _jumpToBottom(true)
-      } else {
-        console.warn(`'tipsSelectHandler' returns an invalid result, the expected return value is string type, got ${typeof newCommand}.`)
-      }
-    })
-    return
-  }
   command.value = selectedItem.command.key
   _resetCursorPos()
   _jumpToBottom(true)

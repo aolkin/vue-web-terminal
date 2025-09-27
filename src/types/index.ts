@@ -153,26 +153,6 @@ export type FailedFunc = (message: string) => void
 export type PushMessageBeforeFunc = (message: Message, name: String) => void
 
 /**
- * 提示选择处理函数
- *
- * @param command       当前用户输入的完整命令行
- * @param cursorIndex   当前光标所处位置
- * @param item          用户选择提示项
- * @param callback      填充结束后需调用此函数返回新的命令行
- */
-export type InputTipsSelectHandlerFunc = (command: string, cursorIndex: number, item: InputTipItem, callback: (cmd: string) => void) => void
-
-/**
- * 用户自定义命令搜索提示实现
- *
- * @param command       当前用户输入的完整命令行
- * @param cursorIndex   当前光标所处位置
- * @param commandStore  命令集合
- * @param callback      搜索结束回调，回调格式为一个数组
- */
-export type InputTipsSearchHandlerFunc = (command: string, cursorIndex: number, commandStore: Command[], callback: (tips: InputTipItem[], openTips?: boolean) => void) => void
-
-/**
  * Comprehensive hook-based autocomplete handler
  * 
  * @param inputData     Input event data including the character being typed
