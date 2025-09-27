@@ -172,6 +172,16 @@ export type InputTipsSelectHandlerFunc = (command: string, cursorIndex: number, 
  */
 export type InputTipsSearchHandlerFunc = (command: string, cursorIndex: number, commandStore: Command[], callback: (tips: InputTipItem[], openTips?: boolean) => void) => void
 
+/**
+ * Comprehensive hook-based autocomplete handler
+ * 
+ * @param inputData     Input event data including the character being typed
+ * @param command       Current complete command line
+ * @param cursorIndex   Current cursor position
+ * @param callback      Callback to return suggestions array
+ */
+export type AutocompleteHookFunc = (inputData: string | null, command: string, cursorIndex: number, callback: (suggestions: InputTipItem[], openTips?: boolean) => void) => void
+
 class TerminalCallback {
 
     onFinishListener: Function

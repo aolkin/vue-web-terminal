@@ -13,6 +13,7 @@ import {
   InputTipItem,
   InputTipsSearchHandlerFunc,
   InputTipsSelectHandlerFunc,
+  AutocompleteHookFunc,
   Message,
   MessageGroup,
   Position,
@@ -169,6 +170,8 @@ const props = defineProps({
   inputTipsSelectHandler: Function as PropType<InputTipsSelectHandlerFunc>,
   //  用户自定义命令搜索提示实现
   inputTipsSearchHandler: Function as PropType<InputTipsSearchHandlerFunc>,
+  //  Hook-based autocomplete handler - comprehensive approach
+  autocompleteHandler: Function as PropType<AutocompleteHookFunc>,
   //  主题
   theme: {
     type: String,
@@ -808,12 +811,20 @@ const _calculatePromptLen = () => {
   }
 }
 
-const _searchCmd = () => {
+const _searchCmd = (inputData?: string | null) => {
   if (!props.enableInputTips) {
     return
   }
 
-  //  用户自定义搜索实现
+  //  Hook-based autocomplete handler (highest priority)
+  if (props.autocompleteHandler) {
+    props.autocompleteHandler(inputData || null, command.value, cursorConf.idx, (items: InputTipItem[], openTips?: boolean) => {
+      _updateTipsItems(items, openTips)
+    })
+    return
+  }
+
+  //  用户自定义搜索实现 (legacy support)
   if (props.inputTipsSearchHandler) {
     props.inputTipsSearchHandler(command.value, cursorConf.idx, allCommandStore.value, (items: InputTipItem[], openTips?: boolean) => {
       _updateTipsItems(items, openTips)
@@ -1517,7 +1528,7 @@ const _onInput = (e: InputEvent | CompositionEvent) => {
   if (_isEmpty(command.value)) {
     _closeTips(true);
   } else {
-    _searchCmd()
+    _searchCmd(e.data)
   }
 
   nextTick(() => {

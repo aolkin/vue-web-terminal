@@ -6,7 +6,7 @@
 // import '~/css/theme/light.css'
 // import '~/css/theme/dark.css'
 import {Terminal, TerminalApi, TerminalAsk, TerminalElementInfo} from '../src/index'
-import {Command, FailedFunc, Message, SuccessFunc} from '../src/types';
+import {Command, FailedFunc, Message, SuccessFunc, AutocompleteHookFunc, InputTipItem} from '../src/types';
 import {reactive, ref} from "vue";
 
 const commandStore: Array<Command> = [
@@ -53,6 +53,64 @@ const initLog = reactive([
   }
 ])
 const testInputValue = ref("")
+
+// Hook-based autocomplete handler example
+const autocompleteHandler: AutocompleteHookFunc = (inputData, command, cursorIndex, callback) => {
+  // This demonstrates a comprehensive hook that responds to character input
+  console.log('Autocomplete hook triggered:', { inputData, command, cursorIndex })
+  
+  // Example: provide suggestions based on command context
+  const suggestions: InputTipItem[] = []
+  
+  if (command.trim().startsWith('git')) {
+    // Git command suggestions
+    const gitCommands = ['add', 'commit', 'push', 'pull', 'checkout', 'branch', 'merge', 'status']
+    const parts = command.split(' ')
+    const lastPart = parts[parts.length - 1].toLowerCase()
+    
+    gitCommands
+      .filter(cmd => cmd.startsWith(lastPart))
+      .forEach(cmd => {
+        suggestions.push({
+          content: `<span class="t-cmd-key">${cmd}</span>`,
+          description: `Git ${cmd} command`,
+          command: { key: cmd, description: `Execute git ${cmd}` }
+        })
+      })
+  } else if (command.trim().startsWith('npm')) {
+    // NPM command suggestions  
+    const npmCommands = ['install', 'run', 'start', 'build', 'test', 'init', 'publish']
+    const parts = command.split(' ')
+    const lastPart = parts[parts.length - 1].toLowerCase()
+    
+    npmCommands
+      .filter(cmd => cmd.startsWith(lastPart))
+      .forEach(cmd => {
+        suggestions.push({
+          content: `<span class="t-cmd-key">${cmd}</span>`,
+          description: `NPM ${cmd} command`,
+          command: { key: cmd, description: `Execute npm ${cmd}` }
+        })
+      })
+  } else {
+    // General command suggestions
+    const generalCommands = ['help', 'clear', 'echo', 'ls', 'cd', 'pwd', 'git', 'npm', 'node']
+    const lastWord = command.split(' ').pop()?.toLowerCase() || ''
+    
+    generalCommands
+      .filter(cmd => cmd.startsWith(lastWord))
+      .forEach(cmd => {
+        suggestions.push({
+          content: `<span class="t-cmd-key">${cmd}</span>`,
+          description: `${cmd} command`,
+          command: { key: cmd, description: `Execute ${cmd}` }
+        })
+      })
+  }
+  
+  // Return suggestions (limit to 5 for demo)
+  callback(suggestions.slice(0, 5), true)
+}
 
 const terminals = ref<Array<any>>([
   {
@@ -390,6 +448,7 @@ const focus = () => {
           :init-log="initLog"
           :theme="item.theme"
           :command-store="commandStore"
+          :autocomplete-handler="autocompleteHandler"
           @exec-cmd="onExecCmd"
           @on-active="onActive"
           @on-inactive="onInactive"
