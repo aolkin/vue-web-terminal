@@ -1156,7 +1156,7 @@ const _endExecCallBack = () => {
 }
 
 const _filterMessageType = (message: Message) => {
-  const valid = message.type && /^(normal|html|code|table|json|ansi)$/.test(message.type)
+  const valid = message.type && /^(normal|html|code|table|json|ansi|component)$/.test(message.type)
   if (!valid) {
     console.debug(`Invalid terminal message type: ${message.type}, the default type normal will be used`)
     message.type = 'normal'
@@ -2147,12 +2147,7 @@ defineExpose({
               </slot>
             </span>
             <div v-else>
-              <span v-if="item.type === 'normal'">
-                <slot name="normal" :message="item">
-                  <t-viewer-normal :message="item"/>
-                </slot>
-              </span>
-              <div v-else-if="item.type === 'json'">
+              <div v-if="item.type === 'json'">
                 <slot name="json" :message="item">
                   <t-viewer-json :message="item" :idx="idx"/>
                 </slot>
@@ -2172,6 +2167,11 @@ defineExpose({
                   <div v-html="item.content"></div>
                 </slot>
               </div>
+              <span v-else>
+                <slot name="normal" :message="item">
+                  <t-viewer-normal :message="item"/>
+                </slot>
+              </span>
             </div>
           </div>
         </div>

@@ -15,7 +15,8 @@ defineProps({
     <span v-if="_nonEmpty(message.tag == null ? message.class : message.tag)"
           :class="message.class"
           style="margin-right: 10px">{{ message.tag == null ? message.class : message.tag }}</span>
-    <span v-html="message.content"></span>
+    <component v-if="'component' in message" :is="message.component" :content="message.content"></component>
+    <span v-else v-html="message.content"></span>
   </span>
 </template>
 

@@ -2,7 +2,7 @@ import {App} from "vue";
 
 export type TerminalMessageClass = 'success' | 'error' | 'info' | 'warning' | 'system'
 
-export type TerminalMessageType = 'cmdLine' | 'normal' | 'json' | 'code' | 'table' | 'html' | 'ansi'
+export type TerminalMessageType = 'cmdLine' | 'normal' | 'json' | 'code' | 'table' | 'html' | 'ansi' | 'component'
 
 export type TerminalCursorStyle = 'block' | 'underline' | 'bar' | 'none'
 
@@ -92,13 +92,24 @@ export type MessageGroup = {
     tag?: string
 }
 
-export type Message = {
-    type?: TerminalMessageType
-    content: string | number | object | MessageContentTable | Array<any>
-    class?: TerminalMessageClass
-    tag?: string,
-    depth?: number
+interface BaseMessage {
+  class?: TerminalMessageClass
+  tag?: string,
+  depth?: number
 }
+
+interface StandardMessage extends BaseMessage {
+  type?: Exclude<TerminalMessageType, 'component'>
+  content: string | number | object | MessageContentTable | Array<any>
+}
+
+interface ComponentMessage extends BaseMessage {
+  type: 'component'
+  content: object
+  component: any
+}
+
+export type Message = StandardMessage | ComponentMessage
 
 export type AskConfig = {
     isPassword: boolean
