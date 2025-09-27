@@ -55,11 +55,16 @@ const initLog = reactive([
 const testInputValue = ref("")
 
 // Hook-based autocomplete handler example
+// This demonstrates a comprehensive hook that responds to character input
+// and provides contextual suggestions based on the command being typed
 const autocompleteHandler: AutocompleteHookFunc = (inputData, command, cursorIndex, callback) => {
-  // This demonstrates a comprehensive hook that responds to character input
+  // inputData: the character(s) that were just typed (null for non-character events)
+  // command: the complete current command string
+  // cursorIndex: the current cursor position
+  // callback: function to call with suggestions array
+  
   console.log('Autocomplete hook triggered:', { inputData, command, cursorIndex })
   
-  // Example: provide suggestions based on command context
   const suggestions: InputTipItem[] = []
   
   if (command.trim().startsWith('git')) {
