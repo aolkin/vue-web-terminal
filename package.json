@@ -35,8 +35,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.3.4",
-    "vue-json-viewer": "^3.0.4"
+    "vue": "^3.3.4"
   },
   "devDependencies": {
     "@types/node": "20.16.13",

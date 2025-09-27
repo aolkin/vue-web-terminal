@@ -1,7 +1,6 @@
 import './css/scrollbar.css'
 import './css/ansi.css'
 import './css/style.css'
-import 'vue-json-viewer/style.css'
 import type {App} from 'vue'
 import TerminalApi, {configMaxStoredCommandCountPerInstance, configStoreName, configTheme} from "./common/api"
 import Terminal from "./Terminal.vue"

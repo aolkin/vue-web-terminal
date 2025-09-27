@@ -51,7 +51,6 @@ import {_parseANSI} from "~/ansi";
 import {getStore} from "~/common/store";
 import THeader from "~/components/THeader.vue";
 import TViewerNormal from "~/components/TViewerNormal.vue";
-import TViewerJson from "~/components/TViewerJson.vue";
 import TViewerCode from "~/components/TViewerCode.vue";
 import TViewerTable from "~/components/TViewerTable.vue";
 import THelpBox from "~/components/THelpBox.vue";
@@ -1156,16 +1155,10 @@ const _endExecCallBack = () => {
 }
 
 const _filterMessageType = (message: Message) => {
-  const valid = message.type && /^(normal|html|code|table|json|ansi|component)$/.test(message.type)
+  const valid = message.type && /^(normal|html|code|table|ansi|component)$/.test(message.type)
   if (!valid) {
     console.debug(`Invalid terminal message type: ${message.type}, the default type normal will be used`)
     message.type = 'normal'
-  } else {
-    if (message.type === 'json') {
-      if (!message.depth) {
-        message.depth = 1;
-      }
-    }
   }
   return valid
 }
@@ -1196,12 +1189,6 @@ const _pushMessage = (message: Message | Array<Message> | string) => {
 
   _pushMessage0(message)
   _jumpToBottom(forceToBottom)
-
-  if (typeof message != 'string' && message.type === 'json') {
-    setTimeout(() => {
-      _jumpToBottom(forceToBottom)
-    }, 80)
-  }
 }
 
 const _pushMessage0 = (message: Message | string, checkSize: boolean = false) => {
@@ -2147,12 +2134,7 @@ defineExpose({
               </slot>
             </span>
             <div v-else>
-              <div v-if="item.type === 'json'">
-                <slot name="json" :message="item">
-                  <t-viewer-json :message="item" :idx="idx"/>
-                </slot>
-              </div>
-              <div v-else-if="item.type === 'code'">
+              <div v-if="item.type === 'code'">
                 <slot name="code" :message="item">
                   <t-viewer-code :message="item"/>
                 </slot>

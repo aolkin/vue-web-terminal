@@ -132,23 +132,6 @@ const onExecCmd = (key: string, command: string, success: SuccessFunc, failed: F
       }
       TerminalApi.pushMessage(name, "loop: " + count)
     }, 200)
-  } else if (key === 'json') {
-    success({
-      type: 'json',
-      content: {
-        key1: '123123',
-        key2: true,
-        key3: 123123123,
-        key4: [{
-          key: 12312,
-          k: "vasdas"
-        }],
-        key5: {
-          "kasdasd": "asdasd",
-          "aksdasd": 1243123423
-        }
-      }
-    })
   } else if (key === 'close') {
     closeWindow(name, true)
     success()
@@ -220,10 +203,7 @@ const onExecCmd = (key: string, command: string, success: SuccessFunc, failed: F
   } else if (key === 'unfold') {
     success(TerminalApi.switchAllFoldState(name, false).toString())
   } else if (key === 'info') {
-    success({
-      type: 'json',
-      content: TerminalApi.elementInfo(name)
-    })
+    success(JSON.stringify(TerminalApi.elementInfo(name), null, 2))
   } else if (key === 'theme') {
     let theme = command.split(" ")[1]
     if (theme.match("dark|light")) {

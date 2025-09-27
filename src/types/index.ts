@@ -2,7 +2,7 @@ import {App} from "vue";
 
 export type TerminalMessageClass = 'success' | 'error' | 'info' | 'warning' | 'system'
 
-export type TerminalMessageType = 'cmdLine' | 'normal' | 'json' | 'code' | 'table' | 'html' | 'ansi' | 'component'
+export type TerminalMessageType = 'cmdLine' | 'normal' | 'code' | 'table' | 'html' | 'ansi' | 'component'
 
 export type TerminalCursorStyle = 'block' | 'underline' | 'bar' | 'none'
 
