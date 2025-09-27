@@ -10,10 +10,8 @@ declare module '@vue/runtime-core' {
     TEditor: typeof import("~/components/TEditor.vue")['default']
     THelpBox: typeof import("~/components/THelpBox.vue")['default']
     TViewerCode: typeof import("~/components/TViewerCode.vue")['default']
-    TViewerJson: typeof import("~/components/TViewerJson.vue")['default']
     TViewerNormal: typeof import("~/components/TViewerNormal.vue")['default']
     TViewerTable: typeof import("~/components/TViewerTable.vue")['default']
-    JsonViewer: typeof import("vue-json-viewer")['default']
     Terminal: typeof import("~/Terminal.vue")['default']
   }
 }
