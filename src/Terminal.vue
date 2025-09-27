@@ -43,6 +43,7 @@ import {
   _pointInRect,
   _safeHtml,
   _screenType,
+  _validateCommandFormatterOutput,
 } from "~/common/util.ts";
 import api, {getConfiguration, register, rename, unregister} from "~/common/api";
 import {WINDOW_STYLE} from "~/common/configuration.ts";
@@ -1609,15 +1610,21 @@ const _dragging = (pos: Position) => {
 }
 
 const _commandFormatter = (cmd: string): string => {
+  let formattedOutput: string;
+  
   if (props.commandFormatter) {
-    return props.commandFormatter(cmd)
+    formattedOutput = props.commandFormatter(cmd);
+  } else {
+    let splitsCode = []
+    let splits = cmd.split(/\r\n|\n|\r/g)
+    for (let c of splits) {
+      splitsCode.push(_defaultMergedCommandFormatter(c))
+    }
+    formattedOutput = splitsCode.join("<br/>")
   }
-  let splitsCode = []
-  let splits = cmd.split(/\r\n|\n|\r/g)
-  for (let c of splits) {
-    splitsCode.push(_defaultMergedCommandFormatter(c))
-  }
-  return splitsCode.join("<br/>")
+  
+  // 验证格式化输出的安全性
+  return _validateCommandFormatterOutput(cmd, formattedOutput);
 }
 
 const _onAskInput = () => {

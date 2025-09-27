@@ -34,6 +34,32 @@ export function _safeHtml(content: string | undefined | null): string {
 }
 
 /**
+ * 验证命令格式化器输出是否安全
+ * 检查是否包含潜在的XSS向量，如果检测到危险内容则回退到安全格式化
+ * 
+ * @param rawCommand 原始命令字符串
+ * @param formattedOutput 格式化器的输出
+ * @returns 安全的格式化输出
+ * @private
+ */
+export function _validateCommandFormatterOutput(rawCommand: string, formattedOutput: string): string {
+    // 检查是否包含潜在危险的HTML标签
+    const dangerousTags = /<(?:script|iframe|object|embed|form|input|textarea|select|button|link|meta|style|base)[^>]*>/i;
+    const dangerousEvents = /on\w+\s*=/i;
+    const dangerousProtocols = /(?:javascript|data|vbscript):/i;
+    
+    if (dangerousTags.test(formattedOutput) || 
+        dangerousEvents.test(formattedOutput) || 
+        dangerousProtocols.test(formattedOutput)) {
+        // 如果检测到危险内容，回退到安全的默认格式化
+        console.warn('Potentially unsafe command formatter output detected, falling back to safe formatting');
+        return _defaultMergedCommandFormatter(rawCommand);
+    }
+    
+    return formattedOutput;
+}
+
+/**
  * 判断一个对象是否为逻辑上的空
  *
  * @param value
