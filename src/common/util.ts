@@ -20,6 +20,20 @@ export function _html(str: string): string {
 }
 
 /**
+ * 安全地转换HTML内容，确保用户输入被正确转义
+ * 
+ * @param content 用户提供的内容
+ * @returns 安全的HTML字符串
+ * @private
+ */
+export function _safeHtml(content: string | undefined | null): string {
+    if (!content) {
+        return '';
+    }
+    return _html(String(content));
+}
+
+/**
  * 判断一个对象是否为逻辑上的空
  *
  * @param value

@@ -41,6 +41,7 @@ import {
   _openUrl,
   _parsePixelFromValue,
   _pointInRect,
+  _safeHtml,
   _screenType,
 } from "~/common/util.ts";
 import api, {getConfiguration, register, rename, unregister} from "~/common/api";
@@ -874,7 +875,7 @@ const _execute = () => {
             //  实时回显处理
             if (message instanceof TerminalFlash) {
               message.onFlush((msg: string) => {
-                flash.content = msg
+                flash.content = _safeHtml(msg)
               })
               message.onFinish(() => {
                 flash.open = false
@@ -1978,8 +1979,8 @@ defineExpose({
                     @click="_clickTips(idx)"
                     :class="'t-cmd-tips-item ' + (idx === tips.selectedIndex ? 't-cmd-tips-item-active ' : ' ') + (idx === 0 ? 't-cmd-tips-item-first ' : ' ')"
               >
-                <span class="t-cmd-tips-content" v-html="item.content"></span>
-                <span class="t-cmd-tips-des" v-html="item.description"></span>
+                <span class="t-cmd-tips-content" v-html="_safeHtml(item.content)"></span>
+                <span class="t-cmd-tips-des" v-html="_safeHtml(item.description)"></span>
               </span>
             </span>
             <span class="t-cmd-tips-footer">
