@@ -574,6 +574,17 @@ watch(() => props.theme, (t) => {
   setTheme(t)
 })
 
+//  监听提示符内容变化，用于重新计算提示符长度
+watch(
+    () => terminalInputPromptRef.value?.textContent,
+    () => {
+      nextTick(() => {
+        _calculatePromptLen()
+      }).then(() => {
+      })
+    }
+)
+
 //  监听改名称
 watch(
     () => props.name,
