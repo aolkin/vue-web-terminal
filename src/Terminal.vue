@@ -2007,7 +2007,6 @@ defineExpose({
                     @compositionstart="_onCompositionstart"
                     @compositionend="_onCompositionend"
                     @focusin="cursorConf.show = true"
-                    @focusout="cursorConf.show = false"
                     @keyup.up.exact="_inputKeyUp"
                     @keyup.down.exact="_inputKeyDown"
                     @keyup.enter="_inputEnter"/>
