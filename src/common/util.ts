@@ -20,46 +20,6 @@ export function _html(str: string): string {
 }
 
 /**
- * 安全地转换HTML内容，确保用户输入被正确转义
- * 
- * @param content 用户提供的内容
- * @returns 安全的HTML字符串
- * @private
- */
-export function _safeHtml(content: string | undefined | null): string {
-    if (!content) {
-        return '';
-    }
-    return _html(String(content));
-}
-
-/**
- * 验证命令格式化器输出是否安全
- * 检查是否包含潜在的XSS向量，如果检测到危险内容则回退到安全格式化
- * 
- * @param rawCommand 原始命令字符串
- * @param formattedOutput 格式化器的输出
- * @returns 安全的格式化输出
- * @private
- */
-export function _validateCommandFormatterOutput(rawCommand: string, formattedOutput: string): string {
-    // 检查是否包含潜在危险的HTML标签
-    const dangerousTags = /<(?:script|iframe|object|embed|form|input|textarea|select|button|link|meta|style|base)[^>]*>/i;
-    const dangerousEvents = /on\w+\s*=/i;
-    const dangerousProtocols = /(?:javascript|data|vbscript):/i;
-    
-    if (dangerousTags.test(formattedOutput) || 
-        dangerousEvents.test(formattedOutput) || 
-        dangerousProtocols.test(formattedOutput)) {
-        // 如果检测到危险内容，回退到安全的默认格式化
-        console.warn('Potentially unsafe command formatter output detected, falling back to safe formatting');
-        return _defaultMergedCommandFormatter(rawCommand);
-    }
-    
-    return formattedOutput;
-}
-
-/**
  * 判断一个对象是否为逻辑上的空
  *
  * @param value
@@ -248,82 +208,6 @@ export function _openUrl(url: string, pushMessage: Function) {
         })
     }
 }
-
-/**
- * 默认命令行样式格式化实现，对部分关键符号高亮处理。
- *
- * 此方法会对高亮字符进行合并，适用于记录命令行
- *
- * @param cmd
- * @return {string}
- * @private
- */
-export function _defaultMergedCommandFormatter(cmd: string): string {
-    //  过滤ASCII 160的空白字符串
-    let split = cmd.replace(/\xA0/g, " ").split(" ")
-    let formatted = ''
-    let isCmdKey = true
-
-    for (let i = 0; i < split.length; i++) {
-        let char = _html(split[i])
-        if (isCmdKey) {
-            formatted += `<span class='t-cmd-key'>${char}</span>`
-            isCmdKey = false
-        } else if (char.startsWith("-")) {
-            formatted += `<span class="t-cmd-arg">${char}</span>`
-        } else if (char === '\r') {
-            //  \r\n换行
-            if (i < split.length - 1 && split[i + 1] === '\n') {
-                formatted += `<br/>`
-                i++
-            }
-            // \r换行
-            else {
-                formatted += `<br/>`
-            }
-        } else if (char === '\n') {
-            formatted += `<br/>`
-        } else if (char.length > 0) {
-            if (char === '|') {
-                isCmdKey = true
-                formatted += `<span>${char}</span>`
-            } else {
-                formatted += '<span>'
-                let startNewCmdKey = false
-                const charArr: string[] = [...char];
-                charArr.forEach((ch, index) => {
-                    if (ch === ',') {
-                        formatted += `<span class="t-cmd-splitter">${ch}</span>`
-                    } else if (ch === '|') {
-                        formatted += ch
-
-                        isCmdKey = true
-                        if (index < char.length - 1) {
-                            formatted += `<span class='t-cmd-key'>`
-                            startNewCmdKey = true
-                        }
-                    } else {
-                        formatted += ch
-                    }
-                    if (index == charArr.length - 1 && ch != '|') {
-                        isCmdKey = false
-                    }
-                });
-
-                formatted += '</span>'
-                if (startNewCmdKey) {
-                    formatted += '</span>'
-                }
-            }
-        }
-        if (i < split.length - 1) {
-            formatted += "<span>&nbsp;</span>"
-        }
-    }
-
-    return formatted
-}
-
 
 /**
  * 默认命令行样式格式化实现，对部分关键符号高亮出路。

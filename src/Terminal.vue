@@ -1093,13 +1093,26 @@ const _saveCurCommand = () => {
   }
 
   let group = _newTerminalLogGroup()
-  const prompt = terminalInputPromptRef.value
+  
+  // Capture the rendered HTML by creating a temporary element with the same structure
+  const tempElement = document.createElement('span')
+  tempElement.className = 't-crude-font t-cmd-line t-cmd-line-content'
+  
+  // Add the prompt HTML
+  const promptHTML = terminalInputPromptRef.value
     ? terminalInputPromptRef.value.innerHTML
     : _html(props.context) + props.contextSuffix
+  
+  // Create a command span - using v-text equivalent (textContent) for security
+  const commandSpan = document.createElement('span')
+  commandSpan.textContent = cmd
+  
+  tempElement.innerHTML = promptHTML
+  tempElement.appendChild(commandSpan)
+  
   group.logs.push({
     type: "cmdLine",
-    content: cmd,
-    prompt: prompt,
+    content: tempElement.innerHTML,
   });
   _jumpToBottom()
 }
@@ -1895,12 +1908,8 @@ defineExpose({
                :style="`margin-top:${lineSpace}px;`"
                @click="_closeGroupFold(group)">
             <span v-if="item.type === 'cmdLine'">
-              <slot name="cmdLine" :item="item" :command="item.content" :prompt="item.prompt">
-                <span class="t-crude-font t-cmd-line t-cmd-line-content">
-                  <span v-html="item.prompt"></span><slot name="command-format" :command="item.content">
-                    <span v-text="item.content"></span>
-                  </slot>
-                </span>
+              <slot name="cmdLine" :item="item">
+                <span class="t-crude-font t-cmd-line t-cmd-line-content" v-html="item.content"></span>
               </slot>
             </span>
             <div v-else>

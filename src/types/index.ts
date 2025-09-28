@@ -101,7 +101,6 @@ interface BaseMessage {
 interface StandardMessage extends BaseMessage {
   type?: Exclude<TerminalMessageType, 'component'>
   content: string | number | object | MessageContentTable | Array<any>
-  prompt?: string
 }
 
 interface ComponentMessage extends BaseMessage {
@@ -141,8 +140,6 @@ export type TerminalElementInfo = {
 export type CommandSortHandlerFunc = (a: any, b: any) => number
 
 export type InputFilterFunc = (str1: string, str2: string, event: InputEvent | CompositionEvent) => string | null
-
-export type CommandFormatterFunc = (cmd: string) => string
 
 export type TerminalApiListenerFunc = (type: string, options?: any) => any | void
 
