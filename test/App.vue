@@ -6,34 +6,9 @@
 // import '~/css/theme/light.css'
 // import '~/css/theme/dark.css'
 import {Terminal, TerminalApi, TerminalAsk, TerminalElementInfo} from '../src/index'
-import {Command, FailedFunc, Message, SuccessFunc} from '../src/types';
+import {FailedFunc, Message, SuccessFunc, AutocompleteHookFunc, InputTipItem} from '../src/types';
 import {reactive, ref} from "vue";
 
-const commandStore: Array<Command> = [
-  {
-    key: "COMMAND CONFIG"
-  },
-  {
-    key: "CONFIG",
-  },
-  {
-    key: "config",
-  },
-  {
-    key: "COMMAND CONFIG come on",
-    description: "This is a very long long long long description."
-  },
-  {
-    key: "CONFIG haha",
-  },
-  {
-    key: "Test CONFIG",
-  },
-  {
-    key: "theme",
-    usage: "theme <dark|light>",
-  }
-]
 const initLog = reactive([
   {
     type: 'normal',
@@ -53,6 +28,66 @@ const initLog = reactive([
   }
 ])
 const testInputValue = ref("")
+
+// Hook-based autocomplete handler example
+// This demonstrates a comprehensive hook that responds to character input
+// and provides contextual suggestions based on the command being typed
+const autocompleteHandler: AutocompleteHookFunc = (inputData, command, cursorIndex, callback) => {
+  // inputData: the character(s) that were just typed (null for non-character events)
+  // command: the complete current command string
+  // cursorIndex: the current cursor position
+  // callback: function to call with suggestions array
+  
+  console.log('Autocomplete hook triggered:', { inputData, command, cursorIndex })
+  
+  const suggestions: InputTipItem[] = []
+  
+  if (command.trim().startsWith('git')) {
+    // Git command suggestions
+    const gitCommands = ['add', 'commit', 'push', 'pull', 'checkout', 'branch', 'merge', 'status']
+    const parts = command.split(' ')
+    const lastPart = parts[parts.length - 1].toLowerCase()
+    
+    gitCommands
+      .filter(cmd => cmd.startsWith(lastPart))
+      .forEach(cmd => {
+        suggestions.push({
+          content: cmd,
+          description: `Git ${cmd} command`
+        })
+      })
+  } else if (command.trim().startsWith('npm')) {
+    // NPM command suggestions  
+    const npmCommands = ['install', 'run', 'start', 'build', 'test', 'init', 'publish']
+    const parts = command.split(' ')
+    const lastPart = parts[parts.length - 1].toLowerCase()
+    
+    npmCommands
+      .filter(cmd => cmd.startsWith(lastPart))
+      .forEach(cmd => {
+        suggestions.push({
+          content: cmd,
+          description: `NPM ${cmd} command`
+        })
+      })
+  } else {
+    // General command suggestions
+    const generalCommands = ['help', 'clear', 'echo', 'ls', 'cd', 'pwd', 'git', 'npm', 'node']
+    const lastWord = command.split(' ').pop()?.toLowerCase() || ''
+    
+    generalCommands
+      .filter(cmd => cmd.startsWith(lastWord))
+      .forEach(cmd => {
+        suggestions.push({
+          content: cmd,
+          description: `${cmd} command`
+        })
+      })
+  }
+  
+  // Return suggestions (limit to 5 for demo)
+  callback(suggestions.slice(0, 5), true)
+}
 
 const terminals = ref<Array<any>>([
   {
@@ -369,7 +404,7 @@ const focus = () => {
           :enable-fold="true"
           :init-log="initLog"
           :theme="item.theme"
-          :command-store="commandStore"
+          :autocomplete-handler="autocompleteHandler"
           @exec-cmd="onExecCmd"
           @on-active="onActive"
           @on-inactive="onInactive"
