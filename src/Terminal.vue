@@ -204,6 +204,13 @@ const selectedTipCommand = computed<InputTipItem | null>(() => {
   return tips.items[tips.selectedIndex] || null
 })
 
+const showMobileBanner = computed<boolean>(() => {
+  // Show banner only on mobile when keyboard is hidden (input not focused)
+  const isMobile = _isPhone() || _isPad()
+  const isInputHidden = !cursorConf.show && !ask.open && !textEditor.open
+  return isMobile && isInputHidden
+})
+
 const _name = ref<string>()
 const command = ref<string>("")
 const inputLock = ref(false)
@@ -1998,6 +2005,7 @@ defineExpose({
                     @compositionstart="_onCompositionstart"
                     @compositionend="_onCompositionend"
                     @focusin="cursorConf.show = true"
+                    @focusout="cursorConf.show = false"
                     @keyup.up.exact="_inputKeyUp"
                     @keyup.down.exact="_inputKeyDown"
                     @keyup.enter="_inputEnter"/>
@@ -2021,6 +2029,11 @@ defineExpose({
                   @close="_textEditorClose"
                   ref="terminalTextEditorRef"></t-editor>
       </slot>
+    </div>
+
+    <!-- Mobile keyboard banner -->
+    <div v-if="showMobileBanner" class="t-mobile-banner">
+      <span class="t-mobile-banner-text">Double-tap the screen to show the keyboard</span>
     </div>
 
     <span class="t-flag t-crude-font t-disable-select">
