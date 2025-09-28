@@ -84,15 +84,6 @@ const props = defineProps({
     type: Array<Message>,
     default: (): Array<Message> => null
   },
-  //  上下文
-  context: {
-    type: String,
-    default: '/vue-web-terminal'
-  },
-  contextSuffix: {
-    type: String,
-    default: ' > '
-  },
   //  显示终端头部
   showHeader: {
     type: Boolean,
@@ -582,17 +573,6 @@ onUnmounted(() => {
 watch(() => props.theme, (t) => {
   setTheme(t)
 })
-
-//  监听上下文
-watch(
-    () => props.context,
-    () => {
-      nextTick(() => {
-        _calculatePromptLen()
-      }).then(() => {
-      })
-    }
-)
 
 //  监听改名称
 watch(
@@ -1952,10 +1932,7 @@ defineExpose({
            :style="`margin-top:${lineSpace}px;`">
           <span ref="terminalInputContentRef">
             <span class="t-prompt t-cmd-line-content" ref="terminalInputPromptRef">
-              <slot name="prompt">
-                <span>{{ context }}</span>
-                <span>{{ contextSuffix }}</span>
-              </slot>
+              <slot name="prompt"></slot>
             </span><span class="t-cmd-line-content">
               <slot name="command-format" :command="command">
                 <span v-text="command"></span>
