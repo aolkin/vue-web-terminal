@@ -44,7 +44,7 @@ import {
   _screenType,
 } from "~/common/util.ts";
 import api, {getConfiguration, register, rename, unregister} from "~/common/api";
-import {DEFAULT_COMMANDS, WINDOW_STYLE} from "~/common/configuration.ts";
+import {WINDOW_STYLE} from "~/common/configuration.ts";
 import {_parseANSI} from "~/ansi";
 import {getStore} from "~/common/store";
 import THeader from "~/components/THeader.vue";
@@ -122,11 +122,6 @@ const props = defineProps({
   logSizeLimit: {
     type: Number,
     default: 200
-  },
-  //  是否开启内部默认指令，例如 help、open等
-  enableDefaultCommand: {
-    type: Boolean,
-    default: true
   },
   //  行间距，单位px
   lineSpace: {
@@ -926,30 +921,7 @@ const _execute = () => {
 
         emits("exec-cmd", cmdKey, command.value, _success, _failed, getName())
       }
-      if (props.enableDefaultCommand) {
-        switch (cmdKey) {
-          case 'help': {
-            _pushMessage({
-              type: 'normal',
-              content: 'Help functionality removed. Please implement custom commands through your application.'
-            })
-            break;
-          }
-          case 'clear':
-            _clearLog(split.length === 2 && split[1] === 'history');
-            break;
-          case 'open':
-            _openUrl(split[1], _pushMessage);
-            break;
-          default: {
-            execute()
-            return
-          }
-        }
-      } else {
-        execute()
-        return;
-      }
+      execute()
     } catch (e) {
       console.error(e)
       _pushMessage({
