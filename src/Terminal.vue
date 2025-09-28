@@ -1952,6 +1952,10 @@ defineExpose({
                  autofocus
                  autocomplete="off"
                  auto-complete="new-password"
+                 autocapitalize="off"
+                 autocorrect="off"
+                 spellcheck="false"
+                 inputmode="text"
                  @keyup.enter="_onAskInput">
         </div>
         <p class="t-last-line t-crude-font t-cmd-line"
@@ -1992,6 +1996,10 @@ defineExpose({
                     ref="terminalCmdInputRef"
                     autocomplete="off"
                     auto-complete="new-password"
+                    autocapitalize="off"
+                    autocorrect="off"
+                    spellcheck="false"
+                    inputmode="text"
                     @keydown="_onInputKeydown"
                     @keyup="_onInputKeyup"
                     @input="_onInput"

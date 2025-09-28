@@ -32,6 +32,10 @@ defineExpose({
               ref="textEditorRef"
               autofocus
               class="t-text-editor"
+              autocapitalize="off"
+              autocorrect="off"
+              spellcheck="false"
+              inputmode="text"
               @input="_updateModelValue"
               :value="props.modelValue"
               @focus="(config as EditorConfig).onFocus"

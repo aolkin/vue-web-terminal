@@ -374,6 +374,10 @@ const focus = () => {
     <button @click="setCommand">set command</button>
     <button @click="jumpToBottom">jump to bottom</button>
     <textarea v-model="testInputValue"
+              autocapitalize="off"
+              autocorrect="off"
+              spellcheck="false"
+              inputmode="text"
               @keydown="textAreaKeyDown"
               @keyup.enter="textAreaKeyEnter"/>
     <button @click="focus">focus</button>
