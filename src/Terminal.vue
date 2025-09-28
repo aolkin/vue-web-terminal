@@ -3,7 +3,6 @@ import {computed, nextTick, onMounted, onUnmounted, PropType, reactive, ref, wat
 import {
   AskConfig,
   Command,
-  CommandFormatterFunc,
   DragConfig,
   EditorConfig,
   EditorSetting,
@@ -24,7 +23,6 @@ import {
 import {
   _copyTextToClipboard,
   _debounce,
-  _defaultMergedCommandFormatter,
   _eventOff,
   _eventOn,
   _getByteLen,
@@ -109,8 +107,6 @@ const props = defineProps({
   inputFilter: Function as PropType<InputFilterFunc>,
   //  拖拽配置
   dragConf: Object as PropType<DragConfig>,
-  //  命令格式化显示函数
-  commandFormatter: Function as PropType<CommandFormatterFunc>,
   //  滚动条滚动模式
   scrollMode: {
     type: String as PropType<ScrollBehavior>,
@@ -281,6 +277,7 @@ const terminalCmdInputRef = ref(null)
 const terminalAskInputRef = ref(null)
 const terminalInputBoxRef = ref(null)
 const terminalInputPromptRef = ref(null)
+const terminalInputContentRef = ref(null)
 const terminalEnFlagRef = ref(null)
 const terminalCnFlagRef = ref(null)
 const terminalTextEditorRef = ref<InstanceType<typeof TEditor>>(null)
@@ -1097,12 +1094,15 @@ const _saveCurCommand = () => {
   }
 
   let group = _newTerminalLogGroup()
-  const prompt = terminalInputPromptRef.value
-    ? terminalInputPromptRef.value.innerHTML
-    : _html(props.context) + props.contextSuffix
+  
+  // Capture the rendered HTML directly from the existing command line element
+  const contentHTML = terminalInputContentRef.value
+    ? terminalInputContentRef.value.innerHTML
+    : ''
+  
   group.logs.push({
     type: "cmdLine",
-    content: `${prompt}${_commandFormatter(cmd)}`,
+    content: contentHTML,
   });
   _jumpToBottom()
 }
@@ -1607,18 +1607,6 @@ const _dragging = (pos: Position) => {
   emits('on-dragging', position, getName())
 }
 
-const _commandFormatter = (cmd: string): string => {
-  if (props.commandFormatter) {
-    return props.commandFormatter(cmd)
-  }
-  let splitsCode = []
-  let splits = cmd.split(/\r\n|\n|\r/g)
-  for (let c of splits) {
-    splitsCode.push(_defaultMergedCommandFormatter(c))
-  }
-  return splitsCode.join("<br/>")
-}
-
 const _onAskInput = () => {
   if (ask.autoReview) {
     _pushMessage(ask.question + (ask.isPassword ? '*'.repeat(ask.input.length) : ask.input))
@@ -1940,7 +1928,7 @@ defineExpose({
         </div>
         <div v-if="flash.open && flash.content" :style="`margin:${lineSpace}px 0;`">
           <slot name="flash" :content="flash.content">
-            <div v-html="flash.content"></div>
+            <div v-text="flash.content"></div>
           </slot>
         </div>
         <div v-if="ask.open && ask.question" :style="`margin:${lineSpace}px 0;`">
@@ -1962,12 +1950,18 @@ defineExpose({
            ref="terminalInputBoxRef"
            v-show="showInputLine"
            :style="`margin-top:${lineSpace}px;`">
-          <span class="t-prompt t-cmd-line-content" ref="terminalInputPromptRef">
-            <slot name="prompt">
-              <span>{{ context }}</span>
-              <span>{{ contextSuffix }}</span>
-            </slot>
-          </span><span class="t-cmd-line-content" v-html="_commandFormatter(command)"></span><span
+          <span ref="terminalInputContentRef">
+            <span class="t-prompt t-cmd-line-content" ref="terminalInputPromptRef">
+              <slot name="prompt">
+                <span>{{ context }}</span>
+                <span>{{ contextSuffix }}</span>
+              </slot>
+            </span><span class="t-cmd-line-content">
+              <slot name="command-format" :command="command">
+                <span v-text="command"></span>
+              </slot>
+            </span>
+          </span><span
             v-show="cursorConf.show"
             :class="`t-cursor t-disable-select t-cursor-${cursorStyle} ${enableCursorBlink ? 't-cursor-blink' : ''}`"
             ref="terminalCursorRef"
@@ -1982,8 +1976,8 @@ defineExpose({
                     @click="_clickTips(idx)"
                     :class="'t-cmd-tips-item ' + (idx === tips.selectedIndex ? 't-cmd-tips-item-active ' : ' ') + (idx === 0 ? 't-cmd-tips-item-first ' : ' ')"
               >
-                <span class="t-cmd-tips-content" v-html="item.content"></span>
-                <span class="t-cmd-tips-des" v-html="item.description"></span>
+                <span class="t-cmd-tips-content" v-text="item.content"></span>
+                <span class="t-cmd-tips-des" v-text="item.description"></span>
               </span>
             </span>
             <span class="t-cmd-tips-footer">

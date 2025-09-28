@@ -141,8 +141,6 @@ export type CommandSortHandlerFunc = (a: any, b: any) => number
 
 export type InputFilterFunc = (str1: string, str2: string, event: InputEvent | CompositionEvent) => string | null
 
-export type CommandFormatterFunc = (cmd: string) => string
-
 export type TerminalApiListenerFunc = (type: string, options?: any) => any | void
 
 export type SuccessFunc = (message?: Message | Array<Message> | string | TerminalFlash | TerminalAsk) => void
