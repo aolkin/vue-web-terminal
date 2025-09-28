@@ -101,6 +101,7 @@ interface BaseMessage {
 interface StandardMessage extends BaseMessage {
   type?: Exclude<TerminalMessageType, 'component'>
   content: string | number | object | MessageContentTable | Array<any>
+  prompt?: string
 }
 
 interface ComponentMessage extends BaseMessage {

@@ -3,7 +3,6 @@ import {computed, nextTick, onMounted, onUnmounted, PropType, reactive, ref, wat
 import {
   AskConfig,
   Command,
-  CommandFormatterFunc,
   DragConfig,
   EditorConfig,
   EditorSetting,
@@ -24,7 +23,6 @@ import {
 import {
   _copyTextToClipboard,
   _debounce,
-  _defaultMergedCommandFormatter,
   _eventOff,
   _eventOn,
   _getByteLen,
@@ -41,9 +39,7 @@ import {
   _openUrl,
   _parsePixelFromValue,
   _pointInRect,
-  _safeHtml,
   _screenType,
-  _validateCommandFormatterOutput,
 } from "~/common/util.ts";
 import api, {getConfiguration, register, rename, unregister} from "~/common/api";
 import {WINDOW_STYLE} from "~/common/configuration.ts";
@@ -111,8 +107,6 @@ const props = defineProps({
   inputFilter: Function as PropType<InputFilterFunc>,
   //  拖拽配置
   dragConf: Object as PropType<DragConfig>,
-  //  命令格式化显示函数
-  commandFormatter: Function as PropType<CommandFormatterFunc>,
   //  滚动条滚动模式
   scrollMode: {
     type: String as PropType<ScrollBehavior>,
@@ -876,7 +870,7 @@ const _execute = () => {
             //  实时回显处理
             if (message instanceof TerminalFlash) {
               message.onFlush((msg: string) => {
-                flash.content = _safeHtml(msg)
+                flash.content = msg
               })
               message.onFinish(() => {
                 flash.open = false
@@ -1104,7 +1098,8 @@ const _saveCurCommand = () => {
     : _html(props.context) + props.contextSuffix
   group.logs.push({
     type: "cmdLine",
-    content: `${prompt}${_commandFormatter(cmd)}`,
+    content: cmd,
+    prompt: prompt,
   });
   _jumpToBottom()
 }
@@ -1609,24 +1604,6 @@ const _dragging = (pos: Position) => {
   emits('on-dragging', position, getName())
 }
 
-const _commandFormatter = (cmd: string): string => {
-  let formattedOutput: string;
-  
-  if (props.commandFormatter) {
-    formattedOutput = props.commandFormatter(cmd);
-  } else {
-    let splitsCode = []
-    let splits = cmd.split(/\r\n|\n|\r/g)
-    for (let c of splits) {
-      splitsCode.push(_defaultMergedCommandFormatter(c))
-    }
-    formattedOutput = splitsCode.join("<br/>")
-  }
-  
-  // 验证格式化输出的安全性
-  return _validateCommandFormatterOutput(cmd, formattedOutput);
-}
-
 const _onAskInput = () => {
   if (ask.autoReview) {
     _pushMessage(ask.question + (ask.isPassword ? '*'.repeat(ask.input.length) : ask.input))
@@ -1918,8 +1895,12 @@ defineExpose({
                :style="`margin-top:${lineSpace}px;`"
                @click="_closeGroupFold(group)">
             <span v-if="item.type === 'cmdLine'">
-              <slot name="cmdLine" :item="item">
-                <span class="t-crude-font t-cmd-line t-cmd-line-content" v-html="item.content"></span>
+              <slot name="cmdLine" :item="item" :command="item.content" :prompt="item.prompt">
+                <span class="t-crude-font t-cmd-line t-cmd-line-content">
+                  <span v-html="item.prompt"></span><slot name="command-format" :command="item.content">
+                    <span v-text="item.content"></span>
+                  </slot>
+                </span>
               </slot>
             </span>
             <div v-else>
@@ -1948,7 +1929,7 @@ defineExpose({
         </div>
         <div v-if="flash.open && flash.content" :style="`margin:${lineSpace}px 0;`">
           <slot name="flash" :content="flash.content">
-            <div v-html="flash.content"></div>
+            <div v-text="flash.content"></div>
           </slot>
         </div>
         <div v-if="ask.open && ask.question" :style="`margin:${lineSpace}px 0;`">
@@ -1971,7 +1952,11 @@ defineExpose({
               <span>{{ context }}</span>
               <span>{{ contextSuffix }}</span>
             </slot>
-          </span><span class="t-cmd-line-content" v-html="_commandFormatter(command)"></span><span
+          </span><span class="t-cmd-line-content">
+            <slot name="command-format" :command="command">
+              <span v-text="command"></span>
+            </slot>
+          </span><span
             v-show="cursorConf.show"
             :class="`t-cursor t-disable-select t-cursor-${cursorStyle} ${enableCursorBlink ? 't-cursor-blink' : ''}`"
             ref="terminalCursorRef"
@@ -1986,8 +1971,8 @@ defineExpose({
                     @click="_clickTips(idx)"
                     :class="'t-cmd-tips-item ' + (idx === tips.selectedIndex ? 't-cmd-tips-item-active ' : ' ') + (idx === 0 ? 't-cmd-tips-item-first ' : ' ')"
               >
-                <span class="t-cmd-tips-content" v-html="_safeHtml(item.content)"></span>
-                <span class="t-cmd-tips-des" v-html="_safeHtml(item.description)"></span>
+                <span class="t-cmd-tips-content" v-text="item.content"></span>
+                <span class="t-cmd-tips-des" v-text="item.description"></span>
               </span>
             </span>
             <span class="t-cmd-tips-footer">
