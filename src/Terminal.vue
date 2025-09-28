@@ -4,7 +4,6 @@ import {
   AskConfig,
   Command,
   CommandFormatterFunc,
-  CommandSortHandlerFunc,
   DragConfig,
   EditorConfig,
   EditorSetting,
@@ -97,10 +96,6 @@ const props = defineProps({
     type: String,
     default: ' > '
   },
-  //  命令行搜索以及help指令用
-  commandStore: Array<Command>,
-  //   命令行排序方式
-  commandSortHandler: Function as PropType<CommandSortHandlerFunc>,
   //  显示终端头部
   showHeader: {
     type: Boolean,
@@ -206,13 +201,13 @@ const isEnableHelpBox = computed<boolean>(() => {
   let enable: boolean = props.enableHelpBox
   if (enable) {
     let tipItem = tips.items[tips.selectedIndex]
-    enable = !!(tipItem && tipItem.command);
+    enable = !!(tipItem && tipItem.content);
   }
   return enable
 })
 
-const selectedTipCommand = computed<Command | null>(() => {
-  return tips.items[tips.selectedIndex] ? tips.items[tips.selectedIndex].command : null
+const selectedTipCommand = computed<InputTipItem | null>(() => {
+  return tips.items[tips.selectedIndex] || null
 })
 
 const _name = ref<string>()
@@ -234,7 +229,6 @@ const byteLen = reactive({
 const showInputLine = ref<boolean>(true)
 const terminalLog = ref<MessageGroup[]>([])
 const logSize = ref<number>(0)
-const allCommandStore = ref<Command[]>([])
 const fullscreenState = ref<boolean>(false)
 const inputBoxParam = reactive({
   boxWidth: 0,
@@ -323,18 +317,6 @@ onMounted(() => {
     _newTerminalLogGroup('init')
     _pushMessage(props.initLog)
   }
-
-  let commandStore = []
-  if (props.enableDefaultCommand) {
-    commandStore = commandStore.concat(DEFAULT_COMMANDS)
-  }
-  if (props.commandStore) {
-    if (props.commandSortHandler) {
-      props.commandStore.sort(props.commandSortHandler)
-    }
-    commandStore = commandStore.concat(props.commandStore)
-  }
-  allCommandStore.value = commandStore
 
   if (terminalWindowRef.value) {
     terminalWindowRef.value.scrollTop = terminalWindowRef.value.offsetHeight;
@@ -818,96 +800,8 @@ const _searchCmd = (inputData?: string | null) => {
     return
   }
 
-  // Default built-in autocomplete behavior
-  let firstSpaceIdx = command.value.indexOf(' ')
-  let cursorInKey = firstSpaceIdx <= 0 || cursorConf.idx <= firstSpaceIdx
-
-  let cmd = command.value.trim().split(' ')[0]
-
-  if (cmd.length === 0) {
-    _closeTips(true)
-  } else {
-    let reg = new RegExp(cmd.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'ig')
-    let matchArray = []
-
-    let lowerCaseCmd = cmd.toLowerCase()
-
-    for (const o of allCommandStore.value) {
-      if (_nonEmpty(o.key)) {
-        let res = o.key.match(reg)
-        if (res != null) {
-          //  匹配分数集合：[是否完全匹配，是否大小写完全匹配，首个匹配索引位置，匹配次数, 源字符串长度]
-          let score = [0, 0, 0, 0, 0]
-          //  完全匹配
-          if (cmd.length === o.key.length) {
-            score[0] = 1
-          } else {
-            score[1] = res.includes(cmd) ? 1 : 0
-            score[2] = o.key.toLowerCase().indexOf(lowerCaseCmd)
-            score[3] = res.length
-            score[4] = o.key.length
-          }
-          matchArray.push({
-            item: o,
-            keyword: o.key.replace(reg, '<span class="t-cmd-key">$&</span>'),
-            score: score
-          })
-        }
-      }
-    }
-
-    if (matchArray.length > 0) {
-      matchArray.sort((a, b) => {
-        let scoreA = a.score
-        let scoreB = b.score
-
-        //  都完全匹配
-        if (scoreA[0] == 1 && scoreA[0] == scoreB[0]) {
-          return 0
-        }
-        //  a完全匹配
-        else if (scoreA[0] == 1) {
-          return -1
-        }
-        //  b完全匹配
-        else if (scoreB[0] == 1) {
-          return 1
-        }
-        //  均不完全匹配
-        else {
-          if (scoreA[1] == scoreB[1]) {
-            //  匹配索引位置越靠左越优先展示
-            let res = scoreA[2] - scoreB[2]
-            if (res == 0) {
-              //  匹配次数越多越优先展示
-              res = scoreB[3] - scoreA[3]
-              //  匹配源字符长度越短越优先展示
-              if (res == 0) {
-                res = scoreA[4] - scoreB[4]
-              }
-            }
-            return res
-          } else {
-            //  大小写完全匹配的优先展示
-            return scoreB[1] - scoreA[1]
-          }
-        }
-      })
-
-      let items = []
-
-      for (let o of matchArray) {
-        items.push({
-          content: o.keyword,
-          description: o.item.description,
-          command: o.item
-        })
-      }
-      _updateTipsItems(items, cursorInKey)
-    } else {
-      _closeTips(true)
-    }
-  }
+  // No autocomplete handler provided, close tips
+  _closeTips(true)
 }
 
 const _focus = (enforceFocus?: boolean | MouseEvent) => {
@@ -934,78 +828,6 @@ const _focus = (enforceFocus?: boolean | MouseEvent) => {
     if (input) {
       input.focus()
     }
-  })
-}
-
-/**
- * help命令执行后调用此方法
- *
- * 命令搜索：comm*、command
- * 分组搜索：:groupA
- */
-const _printHelp = (regExp: RegExp, srcStr: string) => {
-  let content = {
-    head: ['KEY', 'GROUP', 'DETAIL'],
-    rows: []
-  }
-  let findGroup = srcStr && srcStr.length > 1 && srcStr.startsWith(":")
-      ? srcStr.substring(1).toLowerCase()
-      : null
-  allCommandStore.value.forEach(cmd => {
-    if (findGroup) {
-      if (_isEmpty(cmd.group) || findGroup !== cmd.group.toLowerCase()) {
-        return;
-      }
-    } else if (!regExp.test(cmd.key)) {
-      return
-    }
-    let row = []
-    row.push(`<span class='t-cmd-key'>${cmd.key}</span>`)
-    row.push(cmd.group)
-
-    let detail = ''
-    if (_nonEmpty(cmd.description)) {
-      detail += `Description: ${cmd.description}<br>`
-    }
-    if (_nonEmpty(cmd.usage)) {
-      detail += `Usage: <code class="t-code-inline">${_html(cmd.usage)}</code><br>`
-    }
-    if (cmd.example != null) {
-      if (cmd.example.length > 0) {
-        detail += '<br>'
-      }
-
-      for (let idx in cmd.example) {
-        let eg = cmd.example[idx]
-        detail += `
-        <div>
-          <div class="t-cmd-help-eg">
-            eg${parseInt(idx) + 1}:
-          </div>
-          <div class="t-cmd-help-example">
-            <ul class="t-example-ul">
-              <li class="t-example-li"><code class="t-code-inline">${eg.cmd}</code></li>
-              <li class="t-example-li"><span></span></li>
-        `
-
-        if (_nonEmpty(eg.des)) {
-          detail += `<li class="t-example-li"><span>${eg.des}</span></li>`
-        }
-        detail += `
-            </ul>
-          </div>
-        </div>
-        `
-      }
-    }
-
-    row.push(detail)
-
-    content.rows.push(row)
-  })
-  _pushMessage({
-    type: 'table',
-    content: content
   })
 }
 
@@ -1108,9 +930,10 @@ const _execute = () => {
       if (props.enableDefaultCommand) {
         switch (cmdKey) {
           case 'help': {
-            let reg = `^${split.length > 1 && _nonEmpty(split[1]) ? split[1] : "*"}$`
-            reg = reg.replace(/\*/g, ".*")
-            _printHelp(new RegExp(reg, "i"), split[1])
+            _pushMessage({
+              type: 'normal',
+              content: 'Help functionality removed. Please implement custom commands through your application.'
+            })
             break;
           }
           case 'clear':
@@ -1997,7 +1820,7 @@ const _selectTips = () => {
     return
   }
   let selectedItem = tips.items[tips.selectedIndex]
-  command.value = selectedItem.command.key
+  command.value = selectedItem.content
   _resetCursorPos()
   _jumpToBottom(true)
 }

@@ -6,34 +6,9 @@
 // import '~/css/theme/light.css'
 // import '~/css/theme/dark.css'
 import {Terminal, TerminalApi, TerminalAsk, TerminalElementInfo} from '../src/index'
-import {Command, FailedFunc, Message, SuccessFunc, AutocompleteHookFunc, InputTipItem} from '../src/types';
+import {FailedFunc, Message, SuccessFunc, AutocompleteHookFunc, InputTipItem} from '../src/types';
 import {reactive, ref} from "vue";
 
-const commandStore: Array<Command> = [
-  {
-    key: "COMMAND CONFIG"
-  },
-  {
-    key: "CONFIG",
-  },
-  {
-    key: "config",
-  },
-  {
-    key: "COMMAND CONFIG come on",
-    description: "This is a very long long long long description."
-  },
-  {
-    key: "CONFIG haha",
-  },
-  {
-    key: "Test CONFIG",
-  },
-  {
-    key: "theme",
-    usage: "theme <dark|light>",
-  }
-]
 const initLog = reactive([
   {
     type: 'normal',
@@ -77,9 +52,8 @@ const autocompleteHandler: AutocompleteHookFunc = (inputData, command, cursorInd
       .filter(cmd => cmd.startsWith(lastPart))
       .forEach(cmd => {
         suggestions.push({
-          content: `<span class="t-cmd-key">${cmd}</span>`,
-          description: `Git ${cmd} command`,
-          command: { key: cmd, description: `Execute git ${cmd}` }
+          content: cmd,
+          description: `Git ${cmd} command`
         })
       })
   } else if (command.trim().startsWith('npm')) {
@@ -92,9 +66,8 @@ const autocompleteHandler: AutocompleteHookFunc = (inputData, command, cursorInd
       .filter(cmd => cmd.startsWith(lastPart))
       .forEach(cmd => {
         suggestions.push({
-          content: `<span class="t-cmd-key">${cmd}</span>`,
-          description: `NPM ${cmd} command`,
-          command: { key: cmd, description: `Execute npm ${cmd}` }
+          content: cmd,
+          description: `NPM ${cmd} command`
         })
       })
   } else {
@@ -106,9 +79,8 @@ const autocompleteHandler: AutocompleteHookFunc = (inputData, command, cursorInd
       .filter(cmd => cmd.startsWith(lastWord))
       .forEach(cmd => {
         suggestions.push({
-          content: `<span class="t-cmd-key">${cmd}</span>`,
-          description: `${cmd} command`,
-          command: { key: cmd, description: `Execute ${cmd}` }
+          content: cmd,
+          description: `${cmd} command`
         })
       })
   }
@@ -452,7 +424,6 @@ const focus = () => {
           :enable-fold="true"
           :init-log="initLog"
           :theme="item.theme"
-          :command-store="commandStore"
           :autocomplete-handler="autocompleteHandler"
           @exec-cmd="onExecCmd"
           @on-active="onActive"

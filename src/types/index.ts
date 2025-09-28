@@ -120,8 +120,7 @@ export type AskConfig = {
 
 export type InputTipItem = {
     content: string,
-    description?: string,
-    command?: Command
+    description?: string
 }
 
 export type CharWidth = {
