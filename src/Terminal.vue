@@ -277,6 +277,7 @@ const terminalCmdInputRef = ref(null)
 const terminalAskInputRef = ref(null)
 const terminalInputBoxRef = ref(null)
 const terminalInputPromptRef = ref(null)
+const terminalInputContentRef = ref(null)
 const terminalEnFlagRef = ref(null)
 const terminalCnFlagRef = ref(null)
 const terminalTextEditorRef = ref<InstanceType<typeof TEditor>>(null)
@@ -1094,25 +1095,14 @@ const _saveCurCommand = () => {
 
   let group = _newTerminalLogGroup()
   
-  // Capture the rendered HTML by creating a temporary element with the same structure
-  const tempElement = document.createElement('span')
-  tempElement.className = 't-crude-font t-cmd-line t-cmd-line-content'
-  
-  // Add the prompt HTML
-  const promptHTML = terminalInputPromptRef.value
-    ? terminalInputPromptRef.value.innerHTML
-    : _html(props.context) + props.contextSuffix
-  
-  // Create a command span - using v-text equivalent (textContent) for security
-  const commandSpan = document.createElement('span')
-  commandSpan.textContent = cmd
-  
-  tempElement.innerHTML = promptHTML
-  tempElement.appendChild(commandSpan)
+  // Capture the rendered HTML directly from the existing command line element
+  const contentHTML = terminalInputContentRef.value
+    ? terminalInputContentRef.value.innerHTML
+    : ''
   
   group.logs.push({
     type: "cmdLine",
-    content: tempElement.innerHTML,
+    content: contentHTML,
   });
   _jumpToBottom()
 }
@@ -1956,15 +1946,17 @@ defineExpose({
            ref="terminalInputBoxRef"
            v-show="showInputLine"
            :style="`margin-top:${lineSpace}px;`">
-          <span class="t-prompt t-cmd-line-content" ref="terminalInputPromptRef">
-            <slot name="prompt">
-              <span>{{ context }}</span>
-              <span>{{ contextSuffix }}</span>
-            </slot>
-          </span><span class="t-cmd-line-content">
-            <slot name="command-format" :command="command">
-              <span v-text="command"></span>
-            </slot>
+          <span ref="terminalInputContentRef">
+            <span class="t-prompt t-cmd-line-content" ref="terminalInputPromptRef">
+              <slot name="prompt">
+                <span>{{ context }}</span>
+                <span>{{ contextSuffix }}</span>
+              </slot>
+            </span><span class="t-cmd-line-content">
+              <slot name="command-format" :command="command">
+                <span v-text="command"></span>
+              </slot>
+            </span>
           </span><span
             v-show="cursorConf.show"
             :class="`t-cursor t-disable-select t-cursor-${cursorStyle} ${enableCursorBlink ? 't-cursor-blink' : ''}`"
