@@ -724,14 +724,6 @@
 }
 
 /* Show banner only on mobile devices */
-@media screen and (max-width: 768px) {
-    .t-mobile-banner {
-        display: block;
-    }
-}
-
-@media screen and (min-width: 768.1px) {
-    .t-mobile-banner {
-        display: none;
-    }
+.t-mobile-banner {
+    display: block;
 }

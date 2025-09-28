@@ -2033,7 +2033,7 @@ defineExpose({
 
     <!-- Mobile keyboard banner -->
     <div v-if="showMobileBanner" class="t-mobile-banner">
-      <span class="t-mobile-banner-text">Double-tap the screen to show the keyboard</span>
+      <span class="t-mobile-banner-text">Double-tap to show the keyboard</span>
     </div>
 
     <span class="t-flag t-crude-font t-disable-select">
