@@ -697,3 +697,33 @@
     color: var(--t-selection-font-color);
     background-color: var(--t-selection-background-color);
 }
+
+/*--------------------------mobile banner style------------------------*/
+.t-mobile-banner {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-family: var(--t-tips-font-family);
+    z-index: 1000;
+    pointer-events: none;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    max-width: 90%;
+    text-align: center;
+}
+
+.t-mobile-banner-text {
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+/* Show banner only on mobile devices */
+.t-mobile-banner {
+    display: block;
+}
