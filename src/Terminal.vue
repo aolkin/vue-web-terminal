@@ -203,6 +203,7 @@ const selectedTipCommand = computed<InputTipItem | null>(() => {
 // Mobile virtual keyboard visibility detection
 const mobileKeyboardVisible = ref<boolean>(false)
 const initialViewportHeight = ref<number>(0)
+const initialViewportWidth = ref<number>(0)
 
 const showMobileBanner = computed<boolean>(() => {
   // Show banner only on mobile when keyboard is hidden
@@ -334,13 +335,29 @@ onMounted(() => {
   // Initialize mobile keyboard detection
   if (_isPhone() || _isPad()) {
     initialViewportHeight.value = window.visualViewport?.height || window.innerHeight
+    initialViewportWidth.value = window.visualViewport?.width || window.innerWidth
     
     viewportChangeListener.value = () => {
       const currentHeight = window.visualViewport?.height || window.innerHeight
+      const currentWidth = window.visualViewport?.width || window.innerWidth
       const heightDifference = initialViewportHeight.value - currentHeight
+      const widthDifference = Math.abs(initialViewportWidth.value - currentWidth)
+      
+      // Check if this is likely a screen rotation rather than keyboard show/hide
+      // Screen rotation involves significant width changes and reciprocal height changes
+      const isLikelyRotation = widthDifference > 100 && Math.abs(heightDifference) > 200
+      
+      if (isLikelyRotation) {
+        // Update baseline dimensions for new orientation
+        initialViewportHeight.value = currentHeight
+        initialViewportWidth.value = currentWidth
+        // Keep keyboard state unchanged during rotation
+        return
+      }
       
       // Keyboard is likely visible if viewport height decreased by more than 150px
-      mobileKeyboardVisible.value = heightDifference > 150
+      // without significant width changes (indicating it's not rotation)
+      mobileKeyboardVisible.value = heightDifference > 150 && widthDifference < 50
     }
     
     // Use visualViewport API if available (more reliable for keyboard detection)
