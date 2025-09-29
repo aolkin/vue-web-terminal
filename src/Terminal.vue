@@ -200,11 +200,21 @@ const selectedTipCommand = computed<InputTipItem | null>(() => {
   return tips.items[tips.selectedIndex] || null
 })
 
+// Mobile virtual keyboard visibility detection
+const mobileKeyboardVisible = ref<boolean>(false)
+const initialViewportHeight = ref<number>(0)
+
 const showMobileBanner = computed<boolean>(() => {
-  // Show banner only on mobile when keyboard is hidden (input not focused)
+  // Show banner only on mobile when keyboard is hidden
   const isMobile = _isPhone() || _isPad()
-  const isInputHidden = !cursorConf.show && !ask.open && !textEditor.open
-  return isMobile && isInputHidden
+  if (!isMobile) return false
+  
+  // Don't show banner when modals/editors are open
+  const hasModalOpen = ask.open || textEditor.open
+  if (hasModalOpen) return false
+  
+  // Use keyboard visibility detection for mobile
+  return !mobileKeyboardVisible.value
 })
 
 const _name = ref<string>()
@@ -300,6 +310,7 @@ const terminalCmdTipsRef = ref(null)
 const clickListener = ref()
 const keydownListener = ref()
 const terminalListener = ref()
+const viewportChangeListener = ref()
 
 const resizeObserver = ref<ResizeObserver>()
 const forceScrollToBottom = ref(true)
@@ -318,6 +329,27 @@ onMounted(() => {
 
   if (terminalWindowRef.value) {
     terminalWindowRef.value.scrollTop = terminalWindowRef.value.offsetHeight;
+  }
+
+  // Initialize mobile keyboard detection
+  if (_isPhone() || _isPad()) {
+    initialViewportHeight.value = window.visualViewport?.height || window.innerHeight
+    
+    viewportChangeListener.value = () => {
+      const currentHeight = window.visualViewport?.height || window.innerHeight
+      const heightDifference = initialViewportHeight.value - currentHeight
+      
+      // Keyboard is likely visible if viewport height decreased by more than 150px
+      mobileKeyboardVisible.value = heightDifference > 150
+    }
+    
+    // Use visualViewport API if available (more reliable for keyboard detection)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', viewportChangeListener.value)
+    } else {
+      // Fallback to window resize
+      window.addEventListener('resize', viewportChangeListener.value)
+    }
   }
 
   let selectContentText = null
@@ -570,6 +602,16 @@ onUnmounted(() => {
   //  注销事件监听器
   _eventOff(window, 'keydown', keydownListener.value)
   _eventOff(window, "click", clickListener.value)
+  
+  // Clean up mobile keyboard detection listeners
+  if ((_isPhone() || _isPad()) && viewportChangeListener.value) {
+    if (window.visualViewport) {
+      window.visualViewport.removeEventListener('resize', viewportChangeListener.value)
+    } else {
+      window.removeEventListener('resize', viewportChangeListener.value)
+    }
+  }
+  
   if (resizeObserver.value && terminalHeaderRef.value) {
     resizeObserver.value.unobserve(terminalHeaderRef.value)
     resizeObserver.value = null
