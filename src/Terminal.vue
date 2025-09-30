@@ -1936,7 +1936,7 @@ defineExpose({
            :style="`
            ${showHeader ? `height:calc(100% - ${headerHeight}px);
            margin-top: ${headerHeight}px;` : 'height:100%'};
-           padding:${WINDOW_STYLE.PADDING_TOP}px ${WINDOW_STYLE.PADDING_RIGHT}px ${WINDOW_STYLE.PADDING_BOTTOM}px ${enableFold ? WINDOW_STYLE.PADDING_LEFT_FOLD : WINDOW_STYLE.PADDING_LEFT}px;
+           padding:${WINDOW_STYLE.PADDING_TOP}px ${WINDOW_STYLE.PADDING_RIGHT}px ${showMobileBanner ? 80 : WINDOW_STYLE.PADDING_BOTTOM}px ${enableFold ? WINDOW_STYLE.PADDING_LEFT_FOLD : WINDOW_STYLE.PADDING_LEFT}px;
            `"
            ref="terminalWindowRef"
            @click="_focus"
