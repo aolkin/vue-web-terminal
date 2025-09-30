@@ -884,6 +884,14 @@ const _focus = (enforceFocus?: boolean | MouseEvent) => {
 
     if (input) {
       input.focus()
+      // On mobile devices, add a delayed refocus to keep the keyboard open
+      if (_isPhone() || _isPad()) {
+        setTimeout(() => {
+          if (input && document.activeElement !== input) {
+            input.focus()
+          }
+        }, 100)
+      }
     }
   })
 }
@@ -1002,7 +1010,7 @@ const _endExecCallBack = () => {
   command.value = ""
   _resetCursorPos()
   if (isActive.value) {
-    _focus()
+    _focus(true)
     cursorConf.show = true
   } else {
     cursorConf.show = false
