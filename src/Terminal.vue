@@ -205,10 +205,13 @@ const mobileKeyboardVisible = ref<boolean>(false)
 const initialViewportHeight = ref<number>(0)
 const initialViewportWidth = ref<number>(0)
 
+const isMobileDevice = computed<boolean>(() => {
+  return _isPhone() || _isPad()
+})
+
 const showMobileBanner = computed<boolean>(() => {
   // Show banner only on mobile when keyboard is hidden
-  const isMobile = _isPhone() || _isPad()
-  if (!isMobile) return false
+  if (!isMobileDevice.value) return false
   
   // Don't show banner when modals/editors are open
   const hasModalOpen = ask.open || textEditor.open
@@ -333,7 +336,7 @@ onMounted(() => {
   }
 
   // Initialize mobile keyboard detection
-  if (_isPhone() || _isPad()) {
+  if (isMobileDevice.value) {
     initialViewportHeight.value = window.visualViewport?.height || window.innerHeight
     initialViewportWidth.value = window.visualViewport?.width || window.innerWidth
     
@@ -526,7 +529,7 @@ onMounted(() => {
   })
 
   //  如果是移动设备，需要监听touch事件来模拟双击事件
-  if (_isPhone() || _isPad()) {
+  if (isMobileDevice.value) {
     let touchTime = 0
     terminalWindowRef.value.addEventListener('touchend', () => {
       let now = new Date().getTime()
@@ -621,7 +624,7 @@ onUnmounted(() => {
   _eventOff(window, "click", clickListener.value)
   
   // Clean up mobile keyboard detection listeners
-  if ((_isPhone() || _isPad()) && viewportChangeListener.value) {
+  if (isMobileDevice.value && viewportChangeListener.value) {
     if (window.visualViewport) {
       window.visualViewport.removeEventListener('resize', viewportChangeListener.value)
     } else {
@@ -1907,7 +1910,7 @@ defineExpose({
 </script>
 
 <template>
-  <div :class="'t-container ' + (isActive ? '' : 't-disable-select')"
+  <div :class="'t-container ' + (isActive || isMobileDevice ? '' : 't-disable-select')"
        :t-data-key="_hash(getName())"
        :style="containerStyle"
        ref="terminalContainerRef">
