@@ -218,6 +218,10 @@ const showMobileBanner = computed<boolean>(() => {
   return !mobileKeyboardVisible.value
 })
 
+const isMobileDevice = computed<boolean>(() => {
+  return _isPhone() || _isPad()
+})
+
 const _name = ref<string>()
 const command = ref<string>("")
 const inputLock = ref(false)
@@ -1907,7 +1911,7 @@ defineExpose({
 </script>
 
 <template>
-  <div :class="'t-container ' + (isActive ? '' : 't-disable-select')"
+  <div :class="'t-container ' + (isActive || isMobileDevice ? '' : 't-disable-select')"
        :t-data-key="_hash(getName())"
        :style="containerStyle"
        ref="terminalContainerRef">
