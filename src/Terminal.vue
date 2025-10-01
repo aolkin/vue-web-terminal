@@ -1932,7 +1932,7 @@ defineExpose({
                     @on-click="_triggerClick"/>
         </slot>
       </div>
-      <div class="t-window"
+      <div :class="['t-window', { 't-window-with-banner': showMobileBanner }]"
            :style="`
            ${showHeader ? `height:calc(100% - ${headerHeight}px);
            margin-top: ${headerHeight}px;` : 'height:100%'};

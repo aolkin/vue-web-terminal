@@ -305,6 +305,11 @@
     .t-window {
         padding: 0 0 0 15px;
     }
+    
+    /* Add bottom padding when mobile banner is visible */
+    .t-window-with-banner {
+        padding-bottom: 70px !important;
+    }
 }
 
 /*平板*/
