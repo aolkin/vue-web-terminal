@@ -205,6 +205,10 @@ const mobileKeyboardVisible = ref<boolean>(false)
 const initialViewportHeight = ref<number>(0)
 const initialViewportWidth = ref<number>(0)
 
+const isMobileDevice = computed<boolean>(() => {
+  return _isPhone() || _isPad()
+})
+
 const showMobileBanner = computed<boolean>(() => {
   // Show banner only on mobile when keyboard is hidden
   if (!isMobileDevice.value) return false
@@ -215,10 +219,6 @@ const showMobileBanner = computed<boolean>(() => {
   
   // Use keyboard visibility detection for mobile
   return !mobileKeyboardVisible.value
-})
-
-const isMobileDevice = computed<boolean>(() => {
-  return _isPhone() || _isPad()
 })
 
 const _name = ref<string>()
