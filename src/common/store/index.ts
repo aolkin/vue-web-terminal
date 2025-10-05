@@ -28,8 +28,6 @@ export class TerminalStore {
         if (data.cmdLog.length === 0 || data.cmdLog[data.cmdLog.length - 1] !== cmd) {
             data.cmdLog.push(cmd)
 
-            console.log(data.cmdLog.length, this.maxStoredCommandCountPerInstance)
-
             if (data.cmdLog.length > this.maxStoredCommandCountPerInstance) {
                 data.cmdLog.splice(0, data.cmdLog.length - this.maxStoredCommandCountPerInstance)
             }
