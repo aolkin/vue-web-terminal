@@ -261,6 +261,22 @@ const onExecCmd = (key: string, command: string, success: SuccessFunc, failed: F
     success()
   } else if (key === 'clean') {
     ansiLoop(name, 10)
+  } else if (key === 'temp') {
+    // Test the pushTemporaryMessage functionality
+    TerminalApi.pushTemporaryMessage(name, {
+      type: 'normal',
+      class: 'info',
+      content: 'Loading... (this is a temporary message)'
+    })
+    
+    // Simulate an async operation - after 2 seconds, push a real message
+    setTimeout(() => {
+      success({
+        type: 'normal',
+        class: 'success',
+        content: 'Operation completed! The temporary message was automatically removed.'
+      })
+    }, 2000)
   } else {
     failed("Unknown command: " + key)
   }

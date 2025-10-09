@@ -240,6 +240,7 @@ const byteLen = reactive({
 const showInputLine = ref<boolean>(true)
 const terminalLog = ref<MessageGroup[]>([])
 const logSize = ref<number>(0)
+const temporaryMessageInfo = ref<{ groupIndex: number, logIndex: number } | null>(null)
 const fullscreenState = ref<boolean>(false)
 const inputBoxParam = reactive({
   boxWidth: 0,
@@ -563,6 +564,8 @@ onMounted(() => {
   register(getName(), terminalListener.value = (type: string, options?: any) => {
     if (type === 'pushMessage') {
       _pushMessage(options)
+    } else if (type === 'pushTemporaryMessage') {
+      _pushTemporaryMessage(options)
     } else if (type === 'appendMessage') {
       _appendMessage(options as string)
     } else if (type === 'fullscreen') {
@@ -1035,6 +1038,9 @@ const _newTerminalLogGroup = (tag?: string): MessageGroup => {
 }
 
 const _pushMessage = (message: Message | Array<Message> | string) => {
+  // Clear any temporary message before pushing new message
+  _clearTemporaryMessage()
+  
   let forceToBottom = forceScrollToBottom.value
   if (!message) return
   if (message instanceof Array) {
@@ -1082,6 +1088,70 @@ const _pushMessage0 = (message: Message | string, checkSize: boolean = false) =>
   }
 }
 
+const _clearTemporaryMessage = () => {
+  if (temporaryMessageInfo.value !== null) {
+    const { groupIndex, logIndex } = temporaryMessageInfo.value
+    if (groupIndex < terminalLog.value.length) {
+      const group = terminalLog.value[groupIndex]
+      if (logIndex < group.logs.length) {
+        group.logs.splice(logIndex, 1)
+        logSize.value--
+        
+        // If the group is now empty, remove it
+        if (group.logs.length === 0) {
+          terminalLog.value.splice(groupIndex, 1)
+        }
+      }
+    }
+    temporaryMessageInfo.value = null
+  }
+}
+
+const _pushTemporaryMessage = (message: Message | string) => {
+  // Clear any existing temporary message first
+  _clearTemporaryMessage()
+  
+  let forceToBottom = forceScrollToBottom.value
+  if (!message) return
+
+  if (typeof message === 'string') {
+    message = {
+      type: 'normal',
+      content: message as string
+    }
+  } else {
+    _filterMessageType(message)
+    if (message.type === 'ansi') {
+      message.type = 'html'
+      message.content = _parseANSI(message.content as string)
+    }
+
+    if (message.type !== 'cmdLine' && props.pushMessageBefore) {
+      props.pushMessageBefore(message, getName())
+    }
+  }
+
+  let terminalLogLength = terminalLog.value.length
+  if (terminalLogLength === 0) {
+    _newTerminalLogGroup()
+  }
+  terminalLogLength = terminalLog.value.length
+  let logGroup = terminalLog.value[terminalLogLength - 1]
+  
+  // Add the message and track its position
+  const logIndex = logGroup.logs.length
+  logGroup.logs.push(message)
+  logSize.value++
+  
+  // Store the position of this temporary message
+  temporaryMessageInfo.value = {
+    groupIndex: terminalLogLength - 1,
+    logIndex: logIndex
+  }
+  
+  _jumpToBottom(forceToBottom)
+}
+
 const _checkLogSize = () => {
   if (props.logSizeLimit <= 0) {
     console.warn("Invalid attribute 'log-size-limit':", props.logSizeLimit)
@@ -1113,6 +1183,9 @@ const _checkLogSize = () => {
  * @param message 被追加的内容，格式为string
  */
 const _appendMessage = (message: string) => {
+  // Clear any temporary message before appending
+  _clearTemporaryMessage()
+  
   let lastMessage: Message
   for (let i = terminalLog.value.length - 1; i >= 0; i--) {
     let group = terminalLog.value[i]

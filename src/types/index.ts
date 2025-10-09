@@ -228,6 +228,10 @@ export class TerminalApi {
         this.post(name, 'pushMessage', message)
     }
 
+    pushTemporaryMessage(name: string, message: Message | string): void {
+        this.post(name, 'pushTemporaryMessage', message)
+    }
+
     appendMessage(name: string, message: string): void {
         this.post(name, 'appendMessage', message)
     }
