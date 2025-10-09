@@ -1114,34 +1114,16 @@ const _pushTemporaryMessage = (message: Message | string) => {
   let forceToBottom = forceScrollToBottom.value
   if (!message) return
 
-  if (typeof message === 'string') {
-    message = {
-      type: 'normal',
-      content: message as string
-    }
-  } else {
-    _filterMessageType(message)
-    if (message.type === 'ansi') {
-      message.type = 'html'
-      message.content = _parseANSI(message.content as string)
-    }
-
-    if (message.type !== 'cmdLine' && props.pushMessageBefore) {
-      props.pushMessageBefore(message, getName())
-    }
-  }
-
+  // Get the position before pushing the message
   let terminalLogLength = terminalLog.value.length
   if (terminalLogLength === 0) {
     _newTerminalLogGroup()
+    terminalLogLength = 1
   }
-  terminalLogLength = terminalLog.value.length
-  let logGroup = terminalLog.value[terminalLogLength - 1]
+  const logIndex = terminalLog.value[terminalLogLength - 1].logs.length
   
-  // Add the message and track its position
-  const logIndex = logGroup.logs.length
-  logGroup.logs.push(message)
-  logSize.value++
+  // Reuse _pushMessage0 to handle the message
+  _pushMessage0(message, false)
   
   // Store the position of this temporary message
   temporaryMessageInfo.value = {
