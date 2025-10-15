@@ -212,11 +212,11 @@ const isMobileDevice = computed<boolean>(() => {
 const showMobileBanner = computed<boolean>(() => {
   // Show banner only on mobile when keyboard is hidden
   if (!isMobileDevice.value) return false
-  
+
   // Don't show banner when modals/editors are open
   const hasModalOpen = ask.open || textEditor.open
   if (hasModalOpen) return false
-  
+
   // Use keyboard visibility detection for mobile
   return !mobileKeyboardVisible.value
 })
@@ -340,17 +340,17 @@ onMounted(() => {
   if (isMobileDevice.value) {
     initialViewportHeight.value = window.visualViewport?.height || window.innerHeight
     initialViewportWidth.value = window.visualViewport?.width || window.innerWidth
-    
+
     viewportChangeListener.value = () => {
       const currentHeight = window.visualViewport?.height || window.innerHeight
       const currentWidth = window.visualViewport?.width || window.innerWidth
       const heightDifference = initialViewportHeight.value - currentHeight
       const widthDifference = Math.abs(initialViewportWidth.value - currentWidth)
-      
+
       // Check if this is likely a screen rotation rather than keyboard show/hide
       // Screen rotation involves significant width changes and reciprocal height changes
       const isLikelyRotation = widthDifference > 100 && Math.abs(heightDifference) > 200
-      
+
       if (isLikelyRotation) {
         // Update baseline dimensions for new orientation
         initialViewportHeight.value = currentHeight
@@ -358,12 +358,12 @@ onMounted(() => {
         // Keep keyboard state unchanged during rotation
         return
       }
-      
+
       // Keyboard is likely visible if viewport height decreased by more than 150px
       // without significant width changes (indicating it's not rotation)
       mobileKeyboardVisible.value = heightDifference > 150 && widthDifference < 50
     }
-    
+
     // Use visualViewport API if available (more reliable for keyboard detection)
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', viewportChangeListener.value)
@@ -625,7 +625,7 @@ onUnmounted(() => {
   //  注销事件监听器
   _eventOff(window, 'keydown', keydownListener.value)
   _eventOff(window, "click", clickListener.value)
-  
+
   // Clean up mobile keyboard detection listeners
   if (isMobileDevice.value && viewportChangeListener.value) {
     if (window.visualViewport) {
@@ -634,7 +634,7 @@ onUnmounted(() => {
       window.removeEventListener('resize', viewportChangeListener.value)
     }
   }
-  
+
   if (resizeObserver.value && terminalHeaderRef.value) {
     resizeObserver.value.unobserve(terminalHeaderRef.value)
     resizeObserver.value = null
@@ -1040,7 +1040,7 @@ const _newTerminalLogGroup = (tag?: string): MessageGroup => {
 const _pushMessage = (message: Message | Array<Message> | string) => {
   // Clear any temporary message before pushing new message
   _clearTemporaryMessage()
-  
+
   let forceToBottom = forceScrollToBottom.value
   if (!message) return
   if (message instanceof Array) {
@@ -1096,7 +1096,7 @@ const _clearTemporaryMessage = () => {
       if (logIndex < group.logs.length) {
         group.logs.splice(logIndex, 1)
         logSize.value--
-        
+
         // If the group is now empty, remove it
         if (group.logs.length === 0) {
           terminalLog.value.splice(groupIndex, 1)
@@ -1110,7 +1110,7 @@ const _clearTemporaryMessage = () => {
 const _pushTemporaryMessage = (message: Message | string) => {
   // Clear any existing temporary message first
   _clearTemporaryMessage()
-  
+
   let forceToBottom = forceScrollToBottom.value
   if (!message) return
 
@@ -1121,16 +1121,16 @@ const _pushTemporaryMessage = (message: Message | string) => {
     terminalLogLength = 1
   }
   const logIndex = terminalLog.value[terminalLogLength - 1].logs.length
-  
+
   // Reuse _pushMessage0 to handle the message
   _pushMessage0(message, false)
-  
+
   // Store the position of this temporary message
   temporaryMessageInfo.value = {
     groupIndex: terminalLogLength - 1,
     logIndex: logIndex
   }
-  
+
   _jumpToBottom(forceToBottom)
 }
 
@@ -1167,7 +1167,7 @@ const _checkLogSize = () => {
 const _appendMessage = (message: string) => {
   // Clear any temporary message before appending
   _clearTemporaryMessage()
-  
+
   let lastMessage: Message
   for (let i = terminalLog.value.length - 1; i >= 0; i--) {
     let group = terminalLog.value[i]
@@ -1218,12 +1218,12 @@ const _saveCurCommand = () => {
   }
 
   let group = _newTerminalLogGroup()
-  
+
   // Capture the rendered HTML directly from the existing command line element
   const contentHTML = terminalInputContentRef.value
     ? terminalInputContentRef.value.innerHTML
     : ''
-  
+
   group.logs.push({
     type: "cmdLine",
     content: contentHTML,
@@ -1867,9 +1867,14 @@ const _updateTipsItems = (items: InputTipItem[], openTips: boolean = true) => {
     tips.items = items
     tips.selectedIndex = 0
     if (openTips) {
+      // Prepare to show tips: set to transparent, record cursor position, then open
       tips.style.opacity = 0
       tips.cursorIdx = terminalCmdInputRef.value.selectionStart
       tips.open = true
+      // In async autocomplete scenarios, the cursor may not move after tips open,
+      // so position (and opacity back to visible) would never be recalculated.
+      // Explicitly calculate tips position to restore opacity.
+      _calculateTipsPos()
     } else {
       tips.open = false
     }
@@ -1894,6 +1899,7 @@ const _selectTips = () => {
   command.value = selectedItem.content
   _resetCursorPos()
   _jumpToBottom(true)
+  _searchCmd()
 }
 
 const _getElementInfo = (): TerminalElementInfo => {
@@ -2100,7 +2106,7 @@ defineExpose({
                     @click="_clickTips(idx)"
                     :class="'t-cmd-tips-item ' + (idx === tips.selectedIndex ? 't-cmd-tips-item-active ' : ' ') + (idx === 0 ? 't-cmd-tips-item-first ' : ' ')"
               >
-                <span class="t-cmd-tips-content" v-text="item.content"></span>
+                <span class="t-cmd-tips-content" v-text="item.display ?? item.content"></span>
                 <span class="t-cmd-tips-des" v-text="item.description"></span>
               </span>
             </span>

@@ -120,6 +120,7 @@ export type AskConfig = {
 
 export type InputTipItem = {
     content: string,
+    display?: string,
     description?: string
 }
 
@@ -151,7 +152,7 @@ export type PushMessageBeforeFunc = (message: Message, name: String) => void
 
 /**
  * Comprehensive hook-based autocomplete handler
- * 
+ *
  * @param inputData     Input event data including the character being typed
  * @param command       Current complete command line
  * @param cursorIndex   Current cursor position
