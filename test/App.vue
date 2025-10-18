@@ -143,7 +143,6 @@ const onExecCmd = (key: string, command: string, success: SuccessFunc, failed: F
           "          v-show=\"item.show\"\n" +
           "          :name=\"item.name\"\n" +
           "          :title=\"item.name\"\n" +
-          "          :context=\"item.context\"\n" +
           "          :warn-log-count-limit=\"200\"\n" +
           "          :drag-conf=\"item.dragConf\"\n" +
           "          show-header\n" +
@@ -152,6 +151,10 @@ const onExecCmd = (key: string, command: string, success: SuccessFunc, failed: F
           "          @on-active=\"onActive\"\n" +
           "          @on-inactive=\"onInactive\"\n" +
           "          style=\"position: fixed\">\n" +
+          "        <template #prompt>\n" +
+          "          <span v-html=\"item.context\"></span>\n" +
+          "          <span> > </span>\n" +
+          "        </template>\n" +
           "      </terminal>\n" +
           "    </div>\n" +
           "  </div>\n" +
@@ -411,8 +414,6 @@ const focus = () => {
           v-show="item.show"
           :name="item.name"
           :title="item.name"
-          :context="item.context"
-          context-suffix=" > "
           :drag-conf="item.dragConf"
           :show-header="item.showHeader"
           :push-message-before="pushMessageBefore"
@@ -431,6 +432,10 @@ const focus = () => {
           @on-resize="onResize"
           @on-click="onClick"
           style="position: fixed">
+        <template #prompt>
+          <span v-html="item.context"></span>
+          <span> > </span>
+        </template>
         <!--        <template #header>-->
         <!--          <div class="custom-header">This is custom header</div>-->
         <!--        </template>-->
