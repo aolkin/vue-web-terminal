@@ -1467,13 +1467,7 @@ const _onInputKeydown = (e: KeyboardEvent) => {
     return
   }
   let key = e.key.toLowerCase()
-  if (key === 'arrowleft') {
-    _checkInputCursor()
-    _cursorGoLeft()
-  } else if (key === 'arrowright') {
-    _checkInputCursor()
-    _cursorGoRight()
-  } else if (key === 'enter') {
+  if (key === 'enter') {
     e.preventDefault()
   }
 }
@@ -1485,11 +1479,19 @@ const _onInputKeyup = (e: KeyboardEvent) => {
     return
   }
   let code = e.code.toLowerCase()
-  if (key === 'home' || key === 'end' || code === 'altleft' || code === 'metaleft' || code === 'controlleft'
+  // Sync cursor position after any cursor movement keys
+  if (key === 'arrowleft' || key === 'arrowright' || key === 'home' || key === 'end' 
+      || code === 'altleft' || code === 'metaleft' || code === 'controlleft'
       || ((e.ctrlKey || e.metaKey || e.altKey) && (key === 'arrowright' || key === 'arrowleft'))) {
     _checkInputCursor()
     _calculateCursorPos()
   }
+}
+
+const _onInputClick = () => {
+  // Sync cursor position when user clicks to reposition cursor
+  _checkInputCursor()
+  _calculateCursorPos()
 }
 
 const _fullscreen = () => {
@@ -2130,6 +2132,7 @@ defineExpose({
                     @compositionstart="_onCompositionstart"
                     @compositionend="_onCompositionend"
                     @focusin="cursorConf.show = true"
+                    @click="_onInputClick"
                     @keyup.up.exact="_inputKeyUp"
                     @keyup.down.exact="_inputKeyDown"
                     @keyup.enter="_inputEnter"/>
