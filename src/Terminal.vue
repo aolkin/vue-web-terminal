@@ -532,12 +532,59 @@ onMounted(() => {
   //  如果是移动设备，需要监听touch事件来模拟双击事件
   if (isMobileDevice.value) {
     let touchTime = 0
-    terminalWindowRef.value.addEventListener('touchend', () => {
+    let touchStartY = 0
+    let touchStartTime = 0
+    let isSwiping = false
+
+    terminalWindowRef.value.addEventListener('touchstart', (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY
+      touchStartTime = new Date().getTime()
+      isSwiping = false
+    })
+
+    terminalWindowRef.value.addEventListener('touchmove', (e: TouchEvent) => {
+      if (!mobileKeyboardVisible.value) {
+        // Allow normal scrolling when keyboard is not visible
+        return
+      }
+
+      // Block all scrolling when keyboard is open
+      e.preventDefault()
+
+      const touchCurrentY = e.touches[0].clientY
+      const deltaY = touchStartY - touchCurrentY
+      const timeDelta = new Date().getTime() - touchStartTime
+
+      // Detect swipe with minimum distance (50px) and maximum time (300ms)
+      if (Math.abs(deltaY) > 50 && timeDelta < 300) {
+        isSwiping = true
+      }
+    }, { passive: false })
+
+    terminalWindowRef.value.addEventListener('touchend', (e: TouchEvent) => {
       let now = new Date().getTime()
+      
+      // Handle swipe gestures when keyboard is visible
+      if (mobileKeyboardVisible.value && isSwiping) {
+        const touchEndY = e.changedTouches[0].clientY
+        const deltaY = touchStartY - touchEndY
+
+        if (deltaY > 50) {
+          // Swipe up - go to previous command (like up arrow)
+          _inputKeyUp()
+        } else if (deltaY < -50) {
+          // Swipe down - go to next command (like down arrow)
+          _inputKeyDown()
+        }
+        isSwiping = false
+        return
+      }
+
+      // Handle double-tap for focus
       if (touchTime === 0) {
         touchTime = now
       } else {
-        if (new Date().getTime() - touchTime < 600) {
+        if (now - touchTime < 600) {
           //  移动端双击
           _focus(true)
         } else {
