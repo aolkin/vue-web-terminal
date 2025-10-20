@@ -221,6 +221,18 @@ const showMobileBanner = computed<boolean>(() => {
   return !mobileKeyboardVisible.value
 })
 
+const mobileKeyboardMargin = computed<number>(() => {
+  // Add bottom margin when mobile keyboard is visible
+  // Use the exact height difference to account for keyboard size
+  if (isMobileDevice.value && mobileKeyboardVisible.value) {
+    const currentHeight = window.visualViewport?.height || window.innerHeight
+    const heightDifference = initialViewportHeight.value - currentHeight
+    // Return the height difference (how much the keyboard covers)
+    return Math.max(0, heightDifference)
+  }
+  return 0
+})
+
 const _name = ref<string>()
 const command = ref<string>("")
 const inputLock = ref(false)
@@ -1827,7 +1839,7 @@ const _calculateTipsPos = () => {
 
       let containerPaddingLeft = props.enableFold ? WINDOW_STYLE.PADDING_LEFT_FOLD : WINDOW_STYLE.PADDING_LEFT
 
-      //  tips默认在右下角展示
+      //  tips默认在右下角展示，但在移动设备键盘可见时优先显示在上方
       let tipsRelativeTop = FONT_HEIGHT
       let tipsRelativeLeft = cursorRelativeLeft - containerPaddingLeft
 
@@ -1839,10 +1851,11 @@ const _calculateTipsPos = () => {
         }
       }
 
-      //  超下边界
-      if (cursorRect.top + tipsRect.height > containerRect.top + containerRect.height) {
-        //  按照可视区域更大的来展示
-        if (cursorRelativeTop > cursorRelativeBottom) {
+      //  超下边界或者移动设备键盘可见时
+      if (cursorRect.top + tipsRect.height > containerRect.top + containerRect.height ||
+          (isMobileDevice.value && mobileKeyboardVisible.value)) {
+        //  按照可视区域更大的来展示，或在移动键盘可见时优先显示在上方
+        if (cursorRelativeTop > cursorRelativeBottom || (isMobileDevice.value && mobileKeyboardVisible.value)) {
           tipsRelativeTop = -tipsRect.height
         }
       }
@@ -2000,7 +2013,7 @@ defineExpose({
            :style="`
            ${showHeader ? `height:calc(100% - ${headerHeight}px);
            margin-top: ${headerHeight}px;` : 'height:100%'};
-           padding:${WINDOW_STYLE.PADDING_TOP}px ${WINDOW_STYLE.PADDING_RIGHT}px ${WINDOW_STYLE.PADDING_BOTTOM}px ${enableFold ? WINDOW_STYLE.PADDING_LEFT_FOLD : WINDOW_STYLE.PADDING_LEFT}px;
+           padding:${WINDOW_STYLE.PADDING_TOP}px ${WINDOW_STYLE.PADDING_RIGHT}px ${WINDOW_STYLE.PADDING_BOTTOM + mobileKeyboardMargin}px ${enableFold ? WINDOW_STYLE.PADDING_LEFT_FOLD : WINDOW_STYLE.PADDING_LEFT}px;
            `"
            ref="terminalWindowRef"
            @click="_focus"
