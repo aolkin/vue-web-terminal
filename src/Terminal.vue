@@ -548,6 +548,9 @@ onMounted(() => {
         return
       }
 
+      // Block all scrolling when keyboard is open
+      e.preventDefault()
+
       const touchCurrentY = e.touches[0].clientY
       const deltaY = touchStartY - touchCurrentY
       const timeDelta = new Date().getTime() - touchStartTime
@@ -555,7 +558,6 @@ onMounted(() => {
       // Detect swipe with minimum distance (50px) and maximum time (300ms)
       if (Math.abs(deltaY) > 50 && timeDelta < 300) {
         isSwiping = true
-        e.preventDefault() // Prevent scrolling during swipe
       }
     }, { passive: false })
 
