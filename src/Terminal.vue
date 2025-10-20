@@ -223,10 +223,12 @@ const showMobileBanner = computed<boolean>(() => {
 
 const mobileKeyboardMargin = computed<number>(() => {
   // Add bottom margin when mobile keyboard is visible
-  // Use half the viewport height to ensure terminal content stays above keyboard
+  // Use the exact height difference to account for keyboard size
   if (isMobileDevice.value && mobileKeyboardVisible.value) {
-    const viewportHeight = window.visualViewport?.height || window.innerHeight
-    return Math.floor(viewportHeight / 2)
+    const currentHeight = window.visualViewport?.height || window.innerHeight
+    const heightDifference = initialViewportHeight.value - currentHeight
+    // Return the height difference (how much the keyboard covers)
+    return Math.max(0, heightDifference)
   }
   return 0
 })
