@@ -2029,7 +2029,9 @@ defineExpose({
                @click="_closeGroupFold(group)">
             <span v-if="item.type === 'cmdLine'">
               <slot name="cmdLine" :item="item">
-                <span class="t-crude-font t-cmd-line t-cmd-line-content" v-html="item.content"></span>
+                <p class="t-crude-font t-cmd-line">
+                  <span v-html="item.content"></span>
+                </p>
               </slot>
             </span>
             <div v-else>
